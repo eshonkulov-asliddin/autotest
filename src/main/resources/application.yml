@@ -1,0 +1,31 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${MYSQL_HOST_URL}/autotest_db
+    username: ${MYSQL_USERNAME}
+    password: asldevMYSQL2002
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        use_sql_comments: true
+        dialect: org.hibernate.dialect.MySQLDialect
+
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            client-id: 999d329d2aca8b9e68d4
+            client-secret: de358fd25a58c1c5f8d968dd04f9bf2228a6417a
+            scope: repo
+
+server:
+  port: 9091
+
+github:
+  api:
+    url: https://api.github.com

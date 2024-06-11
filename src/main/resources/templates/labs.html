@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Labs List</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body class="bg-light">
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-12">
+            <h2 class="text-center mb-4">Labs List</h2>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4 mb-4" th:each="lab : ${labs}">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title" th:text="${lab.labName}">Lab Name</h5>
+                    <a th:href="@{'/labs/' + ${lab.id} + '/start'}" class="btn btn-dark" th:if="${lab.status.name() == 'NOT_STARTED'}">
+                        See Description
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 mb-4" th:each="takenLab : ${takenLabs}">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title" th:text="${takenLab.lab.labName}">Lab Name</h5>
+                    <a th:href="@{'/labs/' + ${takenLab.id} + '/continue'}" class="btn btn-primary" th:if="${takenLab.status.name() == 'STARTED'}">
+                        Continue
+                    </a>
+                    <a th:href="@{'/api/v1/labs/' + ${takenLab.id}}" class="btn btn-success" th:if="${takenLab.status.name() == 'COMPLETED'}">
+                        Completed
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

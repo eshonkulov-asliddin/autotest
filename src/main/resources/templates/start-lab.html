@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Lab Details</title>
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body class="bg-light">
+  <div class="container mt-5">
+    <div class="row">
+      <div class="col-md-12">
+        <h2 class="text-center mb-4" th:text="${lab.labName}">Lab Name</h2>
+      </div>
+    </div>
+
+    <br>
+    <br>
+
+    <div class="row justify-content-center">
+      <div class="col-md-8">
+        <div id="readme-container">
+          <div th:utext="${readmeHtml}"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+    <br>
+    <br>
+
+  <div class="row justify-content-center">
+    <div class="col-md-4" th:if="${lab.status.name() == 'NOT_STARTED'}">
+      <a th:href="@{'/github/generateRepository/' + ${lab.id}}" id="startTaskBtn" class="btn btn-dark btn-block">
+        <i class="fab fa-github mr-1"></i>
+        Start Lab
+      </a>
+    </div>
+    </div>
+  </div>
+</body>
+</html>
+
+
+<!-- Bootstrap JS -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/1.9.1/showdown.min.js"></script>
+</body>
+</html>

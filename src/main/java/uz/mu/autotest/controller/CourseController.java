@@ -8,13 +8,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uz.mu.autotest.model.Course;
 import uz.mu.autotest.service.CourseService;
+import uz.mu.autotest.utils.ApiConst;
 
 import java.util.List;
 import java.util.Optional;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping(path =ApiConst.COURSES_ENDPOINT)
+@RequestMapping(path = ApiConst.COURSES_ENDPOINT)
 public class CourseController {
 
     private final CourseService courseService;

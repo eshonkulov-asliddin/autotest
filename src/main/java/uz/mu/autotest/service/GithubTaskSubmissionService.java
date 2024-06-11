@@ -10,7 +10,7 @@ import uz.mu.autotest.utils.GithubUrlParser;
 import uz.mu.autotest.exception.GetLastActionRunException;
 import uz.mu.autotest.model.Attempt;
 import uz.mu.autotest.model.UserTakenLab;
-import uz.mu.autotest.websocket.SubmitTaskRequest;
+import uz.mu.autotest.dto.SubmitTaskRequest;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;

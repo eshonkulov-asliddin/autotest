@@ -22,12 +22,13 @@ import uz.mu.autotest.model.Attempt;
 import uz.mu.autotest.model.Lab;
 import uz.mu.autotest.model.LabStatus;
 import uz.mu.autotest.model.UserTakenLab;
+import uz.mu.autotest.service.AuthService;
 import uz.mu.autotest.service.GithubTaskSubmissionService;
 import uz.mu.autotest.service.LabService;
 import uz.mu.autotest.service.UserService;
 import uz.mu.autotest.service.UserTakenLabService;
 import uz.mu.autotest.utils.GithubUrlParser;
-import uz.mu.autotest.websocket.SubmitTaskRequest;
+import uz.mu.autotest.dto.SubmitTaskRequest;
 
 import java.security.Principal;
 import java.util.Optional;

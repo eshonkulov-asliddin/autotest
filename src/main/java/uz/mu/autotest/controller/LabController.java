@@ -2,8 +2,6 @@ package uz.mu.autotest.controller;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,6 +16,7 @@ import uz.mu.autotest.service.AttemptService;
 import uz.mu.autotest.service.LabService;
 import uz.mu.autotest.service.ReadmeService;
 import uz.mu.autotest.service.UserTakenLabService;
+import uz.mu.autotest.utils.ApiConst;
 import uz.mu.autotest.utils.GithubUrlParser;
 
 import java.util.List;

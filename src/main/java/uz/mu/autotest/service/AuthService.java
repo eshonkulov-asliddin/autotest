@@ -1,4 +1,4 @@
-package uz.mu.autotest.controller;
+package uz.mu.autotest.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;

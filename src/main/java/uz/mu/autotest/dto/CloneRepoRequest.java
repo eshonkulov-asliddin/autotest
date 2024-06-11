@@ -1,4 +1,4 @@
-package uz.mu.autotest.controller;
+package uz.mu.autotest.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

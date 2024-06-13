@@ -25,7 +25,8 @@ http://www.thymeleaf.org ">
 <div class="container mt-5">
     <div class="row">
         <div class="col-md-12">
-            <h2 class="text-center mb-4" th:text="${startedLab.lab.labName}">Lab Name</h2>
+            <h2 th:if="${lab.status.name() == 'STARTED'}" class="text-center mb-4" th:text="${lab.lab.labName}">Lab Name</h2>
+            <h2 th:if="${lab.status.name() == 'NOT_STARTED'}" class="text-center mb-4" th:text="${lab.labName}">Lab Name</h2>
         </div>
     </div>
 
@@ -43,13 +44,16 @@ http://www.thymeleaf.org ">
     <br>
     <br>
 
-    <div class="card">
-        <div class="card-body">
-            <h5 class="card-title">GitHub Repository</h5>
-            <p class="card-text">Check out task on GitHub:</p>
-            <a th:href="@{${startedLab.githubUrl}}" class="btn btn-primary" target="_blank">GitHub Repository</a>
+    <div id="repositoryCard">
+        <div class="card" th:if="${lab.status.name() == 'STARTED'}">
+            <div class="card-body">
+                <h5 class="card-title">GitHub Repository</h5>
+                <p class="card-text">Check out task on GitHub:</p>
+                <a th:href="@{${lab.githubUrl}}" class="btn btn-primary" target="_blank">GitHub Repository</a>
+            </div>
         </div>
     </div>
+
 
     <div id="loadingIndicator" class="spinner-grow text-dark" role="status" style="display:none">
         <span class="sr-only">Loading...</span>
@@ -59,8 +63,17 @@ http://www.thymeleaf.org ">
     <br>
 
     <div class="row justify-content-center">
-        <div class="col-md-2" th:if="${startedLab.status.name() == 'STARTED'}">
-            <button id="connect" class="btn btn-dark btn-block" th:data-lab-id="${startedLab.lab.id}">
+        <div class="col-md-2" th:if="${lab.status.name() == 'NOT_STARTED'}">
+            <button id="startTask" class="btn btn-dark btn-block" th:data-not-started-lab-id="${lab.id}">
+                <i class="fab fa-github mr-1"></i>
+                Start Lab
+            </button>
+        </div>
+    </div>
+
+    <div id="submitTaskDiv" class="row justify-content-center">
+        <div class="col-md-2" th:if="${lab.status.name() == 'STARTED'}">
+            <button id="submitTask" class="btn btn-dark btn-block" th:data-lab-id="${lab.lab.id}">
                 <i class="fab fa-github mr-1"></i>
                 Submit
             </button>
@@ -72,7 +85,7 @@ http://www.thymeleaf.org ">
     <br>
     <br>
 
-    <div class="accordion accordion-flush" id="accordionFlushExample">
+    <div class="accordion accordion-flush" id="accordionFlushExample" >
         <div class="accordion-item" th:each="attempt: ${attempts}">
             <h2 class="accordion-header" th:id="'heading_' + ${attempt.id}">
                 <button class="accordion-button collapsed "
@@ -98,7 +111,6 @@ http://www.thymeleaf.org ">
     </div>
 
 
-    <br>
     <br>
     <br>
     <br>

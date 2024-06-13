@@ -32,7 +32,6 @@ public class Attempt {
                 ", runNumber=" + runNumber +
                 ", detailsUrl='" + detailsUrl + '\'' +
                 ", result=" + result +
-                ", userTakenLabId=" + userTakenLab.getId() +
                 '}';
     }
 }

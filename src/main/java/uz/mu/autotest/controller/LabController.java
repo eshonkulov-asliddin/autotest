@@ -57,7 +57,7 @@ public class LabController {
         // Filter out labs that are not taken by users
         List<Lab> remainingLabs = labsByCourseId.stream()
                 .filter(lab -> !takenLabIds.contains(lab.getId()))
-                .collect(Collectors.toList());
+                .toList();
 
         log.info("notStartedLabs: {}", remainingLabs);
 
@@ -69,25 +69,25 @@ public class LabController {
     @GetMapping("/{labId}/start")
     public String getNotStartedLabById(@PathVariable(name= "labId") Long labId, Model model) {
         Optional<Lab> notStartedLab = labService.getById(labId);
-        String readmeUrl = GithubUrlParser.generateReadmeUrl(notStartedLab.get().getGithubUrl());
-        String readmeHtml = readmeService.getReadmeHtml(readmeUrl);
-        log.info("Retrieved Lab: {}", notStartedLab.get());
-        model.addAttribute("lab", notStartedLab.get());
-        model.addAttribute("readmeHtml", readmeHtml);
-        return "start-lab.html";
-    }
-
-    @GetMapping("/{labId}/continue")
-    public String getStartedLabById(@PathVariable(name="labId") Long labId, Model model) {
         Optional<UserTakenLab> userTakenLab = userTakenLabService.getById(labId);
-        String readmeUrl = GithubUrlParser.generateReadmeUrl(userTakenLab.get().getLab().getGithubUrl());
-        String readmeHtml = readmeService.getReadmeHtml(readmeUrl);
-        log.info("Retrieved Started Lab: {}", userTakenLab.get());
-        List<Attempt> attemptsByUserTakenLabId = attemptService.getAttemptsByUserTakenLabId(userTakenLab.get().getId());
-        log.info("Retrieved Attemps: {}", attemptsByUserTakenLabId);
-        model.addAttribute("startedLab", userTakenLab.get());
-        model.addAttribute("attempts", attemptsByUserTakenLabId);
-        model.addAttribute("readmeHtml", readmeHtml);
-        return "continue-lab.html";
+
+        if (userTakenLab.isPresent()) {
+            String readmeUrl = GithubUrlParser.generateReadmeUrl(userTakenLab.get().getLab().getGithubUrl());
+            String readmeHtml = readmeService.getReadmeHtml(readmeUrl);
+            log.info("Retrieved Started Lab: {}", userTakenLab.get());
+            List<Attempt> attemptsByUserTakenLabId = attemptService.getAttemptsByUserTakenLabId(userTakenLab.get().getId());
+            log.info("Retrieved Attemps: {}", attemptsByUserTakenLabId);
+            model.addAttribute("lab", userTakenLab.get());
+            model.addAttribute("attempts", attemptsByUserTakenLabId);
+            model.addAttribute("readmeHtml", readmeHtml);
+        }else {
+            String readmeUrl = GithubUrlParser.generateReadmeUrl(notStartedLab.get().getGithubUrl());
+            String readmeHtml = readmeService.getReadmeHtml(readmeUrl);
+            log.info("Retrieved Lab: {}", notStartedLab.get());
+            model.addAttribute("lab", notStartedLab.get());
+            model.addAttribute("readmeHtml", readmeHtml);
+        }
+
+        return "lab.html";
     }
 }

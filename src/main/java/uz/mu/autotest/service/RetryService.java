@@ -24,14 +24,13 @@ public class RetryService {
     private final ObjectMapper objectMapper;
 
     @Async
-    public CompletableFuture<Attempt> retryAction(String owner, String repo, String accessToken, UserTakenLab userTakenLab) {
+    public CompletableFuture<Attempt> retryAction(String owner, String repo, String accessToken, UserTakenLab userTakenLab, String simpSessionId) {
         final int maxAttempts = 5;
         int attempts = 0;
         long delayMillis = 30000; // Initial delay of 1 second
 
         while (attempts < maxAttempts) {
             try {
-                // Exponential backoff
                 Thread.sleep(delayMillis);
 
                 Optional<Attempt> lastAttempt = gitHubApiService.getLastActionRun(owner, repo, accessToken);
@@ -41,7 +40,6 @@ public class RetryService {
                     attempt.setUserTakenLab(userTakenLab);
                     attemptService.addAttempt(attempt);
                     log.info("Successfully added new attempt {}", attempt);
-                    simpMessagingTemplate.convertAndSendToUser(owner, "/topic/attempts", objectMapper.writeValueAsString(lastAttempt.get()));
                     return CompletableFuture.completedFuture(attempt);
                 }
             } catch (InterruptedException e) {

@@ -19,25 +19,25 @@ import java.util.concurrent.ExecutionException;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class GithubTaskSubmissionService {
+public class SubmitTaskService {
 
     private final UserTakenLabService userTakenLabService;
     private final GithubClient githubClient;
     private final RetryService retryService;
 
     @Transactional
-    public Attempt submitTask(SubmitTaskRequest request, String owner, String accessToken) {
+    public Attempt submitTask(SubmitTaskRequest request, String owner, String accessToken, String simpSessionId) {
 
         Optional<UserTakenLab> userTakenLab = userTakenLabService.getById(request.labId());
         log.info("Retrieved Started Lab: {}", userTakenLab.get());
 
         String repo = GithubUrlParser.extractRepoName(userTakenLab.get().getGithubUrl());
-
+        log.info("Extracted Repo Name: {}", repo);
         ResponseEntity<String> response = githubClient.triggerWorkflow(owner, repo, accessToken);
         log.info("Trigger Workflow Response: {}", response);
 
         try {
-            CompletableFuture<Attempt> attemptCompletableFuture = retryService.retryAction(owner, repo, accessToken, userTakenLab.get());
+            CompletableFuture<Attempt> attemptCompletableFuture = retryService.retryAction(owner, repo, accessToken, userTakenLab.get(), simpSessionId);
             Attempt attempt = attemptCompletableFuture.get();
             log.info("Last Attempt: {}", attempt);
             return attempt;

@@ -33,7 +33,7 @@
             <div class="card">
                 <div class="card-body">
                     <h5 class="card-title" th:text="${takenLab.lab.labName}">Lab Name</h5>
-                    <a th:href="@{'/labs/' + ${takenLab.id} + '/continue'}" class="btn btn-primary" th:if="${takenLab.status.name() == 'STARTED'}">
+                    <a th:href="@{'/labs/' + ${takenLab.id} + '/start'}" class="btn btn-primary" th:if="${takenLab.status.name() == 'STARTED'}">
                         Continue
                     </a>
                     <a th:href="@{'/api/v1/labs/' + ${takenLab.id}}" class="btn btn-success" th:if="${takenLab.status.name() == 'COMPLETED'}">

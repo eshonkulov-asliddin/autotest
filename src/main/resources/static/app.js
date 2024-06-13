@@ -2,44 +2,59 @@ const stompClient = new StompJs.Client({
     brokerURL: 'ws://localhost:9091/mu-autotest'
 });
 
-stompClient.onConnect = (frame) => {
-    console.log('Connected: ' + frame);
-    stompClient.subscribe('/user/topic/attempts', (response) => {
-        console.log(response)
-        var attempt = JSON.parse(response.body);
 
-        // Access the attributes of the Attempt object
-        var id = attempt.id;
-        var runNumber = attempt.runNumber;
-        var detailsUrl = attempt.detailsUrl;
-        var result = attempt.result;
-        // Access other attributes as needed
-
-        // Handle the message as desired
-        console.log("Received Attempt: ", attempt);
-
-        // Example: Update HTML content with the received data
-        var attemptInfo = "ID: " + id + ", Run Number: " + runNumber + ", Result: " + result;
-        console.log(attemptInfo)
-        console.log(JSON.parse(response.body));
-        addAccordionItem(JSON.parse(response.body))
-        disconnect();
-    });
-    submitTask();
-};
-
-stompClient.onWebSocketError = (error) => {
-    console.error('Error with websocket', error);
-};
-
-stompClient.onStompError = (frame) => {
-    console.error('Broker reported error: ' + frame.headers['message']);
-    console.error('Additional details: ' + frame.body);
-};
-
-
-function connect(callback) {
+function submitTask(callback) {
     stompClient.activate();
+    // submit task websocket connection
+    stompClient.onConnect = (frame) => {
+        console.log('Connected: ' + frame);
+        stompClient.subscribe('/user/topic/attempts', (response) => {
+            console.log(JSON.parse(response.body));
+            addAccordionItem(JSON.parse(response.body))
+            disconnect();
+        });
+        buildAndTestRepository();
+    };
+
+    stompClient.onWebSocketError = (error) => {
+        console.error('Error with websocket', error);
+    };
+
+    stompClient.onStompError = (frame) => {
+        console.error('Broker reported error: ' + frame.headers['message']);
+        console.error('Additional details: ' + frame.body);
+    };
+}
+
+function startTask(callback) {
+    stompClient.activate();
+    // generate repository websocket connection
+    stompClient.onConnect = (frame) => {
+        console.log('Connected: ' + frame);
+        stompClient.subscribe('/user/topic/repositories', (response) => {
+            console.log(response)
+            var userTakenLab = JSON.parse(response.body);
+            const id = userTakenLab.id;
+            const githubUrl = userTakenLab.githubUrl;
+            const status = userTakenLab.status;
+            const courseId = userTakenLab.course.id;
+            const labId = userTakenLab.lab.id;
+            console.log("Started Lab: ", userTakenLab);
+            addRepositoryCard(githubUrl, labId);
+            disconnect();
+        });
+        generateRepository();
+    };
+
+    stompClient.onWebSocketError = (error) => {
+        console.error('Error with websocket', error);
+    };
+
+    stompClient.onStompError = (frame) => {
+        console.error('Broker reported error: ' + frame.headers['message']);
+        console.error('Additional details: ' + frame.body);
+    };
+
 }
 
 function disconnect() {
@@ -47,9 +62,9 @@ function disconnect() {
     console.log("Disconnected");
 }
 
-function submitTask() {
+function buildAndTestRepository() {
     if (stompClient.connected) {
-        let labId = parseInt($("#connect").data("lab-id"));
+        let labId = parseInt($("#submitTask").data("lab-id"));
         console.log(labId);
         stompClient.publish({
             destination: "/app/submitTask",
@@ -61,6 +76,76 @@ function submitTask() {
     }
 }
 
+function generateRepository() {
+    if (stompClient.connected) {
+        let labId = parseInt($("#startTask").data("not-started-lab-id"));
+        console.log(labId);
+        stompClient.publish({
+            destination: "/app/generateRepository",
+            body: JSON.stringify({'labId': labId})
+        });
+    } else {
+        // Handle case where WebSocket connection is not yet established
+        console.error('WebSocket connection not established');
+    }
+}
+
+const buildRepositoryCard = function(githubUrl) {
+    console.log("Constructing repository card ...");
+    let cardDiv = document.createElement("div");
+    cardDiv.classList.add("card");
+
+    let cardBodyDiv = document.createElement("div");
+    cardBodyDiv.classList.add("card-body");
+
+    let cardTitle = document.createElement("h5");
+    cardTitle.classList.add("card-title");
+    cardTitle.textContent = "GitHub Repository";
+
+    let cardText = document.createElement("p");
+    cardText.classList.add("card-text");
+    cardText.textContent = "Check out task on GitHub:";
+
+    let cardLink = document.createElement("a");
+    cardLink.setAttribute("href", githubUrl);
+    cardLink.setAttribute("target", "_blank");
+    cardLink.classList.add("btn", "btn-primary");
+    cardLink.textContent = "GitHub Repository";
+
+    // Appending elements
+    cardBodyDiv.appendChild(cardTitle);
+    cardBodyDiv.appendChild(cardText);
+    cardBodyDiv.appendChild(cardLink);
+
+    cardDiv.appendChild(cardBodyDiv);
+
+    return cardDiv;
+
+}
+
+function createSubmitTaskButton(labId) {
+    let button = document.createElement('button');
+    button.id = 'submitTask';
+    button.className = 'btn btn-dark btn-block';
+    button.dataset.labId = labId;
+
+    // Create the icon
+    let icon = document.createElement('i');
+    icon.className = 'fab fa-github mr-1';
+
+    // Append the icon and text to the button
+    button.appendChild(icon);
+    button.appendChild(document.createTextNode(' Submit'));
+
+    // Create the div
+    let div = document.createElement('div');
+    div.className = 'col-md-2';
+
+    // Append the button to the div
+    div.appendChild(button);
+
+    return div;
+}
 
 const buildAccordionItem = function (id, result, title, descriptionUrl) {
     let color;
@@ -111,17 +196,22 @@ const buildAccordionItem = function (id, result, title, descriptionUrl) {
     return item;
 }
 
-
 function addAccordionItem(attempt) {
     $("#accordionFlushExample").append(buildAccordionItem(attempt.id, attempt.result, "Verification " + attempt.runNumber, attempt.detailsUrl));
 }
 
-
-
+function addRepositoryCard(githubUrl, labId) {
+    $("#repositoryCard").append(buildRepositoryCard(githubUrl));
+    $("#startTask").hide();
+    $("#submitTaskDiv").append(createSubmitTaskButton(labId));
+}
 
 $(function () {
     $("form").on('submit', (e) => e.preventDefault());
-    $( "#connect" ).click(() => connect());
+    $( "#submitTask" ).click(() => submitTask());
+    $( "#startTask" ).click(() => startTask());
     $( "#disconnect" ).click(() => disconnect());
-    $( "#send" ).click(() => submitTask());
+});
+$(document).on('click', '#submitTask', function() {
+    submitTask();
 });

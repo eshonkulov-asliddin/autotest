@@ -1,6 +1,7 @@
 package uz.mu.autotest.controller;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,7 +11,8 @@ import uz.mu.autotest.service.CourseService;
 import java.util.List;
 
 @Controller
-@AllArgsConstructor
+@RequiredArgsConstructor
+@Slf4j
 public class UserController {
 
     private final CourseService courseService;

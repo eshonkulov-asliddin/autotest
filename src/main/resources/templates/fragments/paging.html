@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://thymeleaf.org ">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<a th:fragment="paging(pageNum, label, tooltip)" class="page-link"
+   th:href="@{'/students?' + ${keyword!=null && keyword!=''? 'keyword=' + keyword + '&' : ''} + 'page=' + ${pageNum} + '&size=' + ${pageSize}}"
+   th:title="${tooltip}" rel="tooltip">
+    [[${label}]]
+</a>
+</body>
+</html>

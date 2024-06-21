@@ -75,19 +75,12 @@
 <form class="form-signin" action="/login" method="POST">
     <img class="mb-4" src="https://millatumidi.uz/assets/img/logo/mu-logo.png" alt="" width="130" height="72">
     <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
-    <input type="email" id="inputEmail" class="form-control" placeholder="Email address" required autofocus>
-    <input type="password" id="inputPassword" class="form-control" placeholder="Password" required>
-    <div class="checkbox mb-3">
-        <label>
-            <input type="checkbox" value="remember-me"> Remember me
-        </label>
-    </div>
+    <input type="text" id="inputEmail" name="username" class="form-control" placeholder="Username" required autofocus>
+    <input type="password" id="inputPassword" name="password" class="form-control" placeholder="Password" required>
     <button class="btn btn-primary btn-block mt-2" type="submit">Sign in</button>
-    <a href="/oauth2/authorization/github" class="btn btn-dark btn-block mt-2">
-        <i class="fab fa-github mr-2"></i> Sign In
-    </a>
     <p class="mt-5 mb-3 text-muted">&copy; 2023-2024</p>
 </form>
+
 </body>
 
 </html>

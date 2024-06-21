@@ -1,4 +1,4 @@
-package uz.mu.autotest.config;
+package uz.mu.autotest.security;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;

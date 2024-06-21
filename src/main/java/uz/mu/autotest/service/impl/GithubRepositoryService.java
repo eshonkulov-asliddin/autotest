@@ -1,4 +1,4 @@
-package uz.mu.autotest.service;
+package uz.mu.autotest.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +12,11 @@ import uz.mu.autotest.exception.NotFoundException;
 import uz.mu.autotest.model.Lab;
 import uz.mu.autotest.model.LabStatus;
 import uz.mu.autotest.model.UserTakenLab;
+import uz.mu.autotest.service.AuthService;
+import uz.mu.autotest.service.LabService;
+import uz.mu.autotest.service.RepositoryService;
+import uz.mu.autotest.service.UserService;
+import uz.mu.autotest.service.UserTakenLabService;
 import uz.mu.autotest.utils.GithubUrlParser;
 
 import java.util.Optional;
@@ -19,7 +24,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class GenerateRepositoryService {
+public class GithubRepositoryService implements RepositoryService {
 
     private final LabService labService;
     private final AuthService authService;

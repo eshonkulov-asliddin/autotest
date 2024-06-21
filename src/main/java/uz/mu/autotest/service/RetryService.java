@@ -24,7 +24,7 @@ public class RetryService {
     private final ObjectMapper objectMapper;
 
     @Async
-    public CompletableFuture<Attempt> retryAction(String owner, String repo, String accessToken, UserTakenLab userTakenLab, String simpSessionId) {
+    public CompletableFuture<Attempt> retryAction(String owner, String repo, String accessToken, UserTakenLab userTakenLab) {
         final int maxAttempts = 5;
         int attempts = 0;
         long delayMillis = 30000; // Initial delay of 1 second

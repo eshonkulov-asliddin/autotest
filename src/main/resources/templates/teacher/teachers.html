@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.thymeleaf.org ">
+<head>
+    <title>Teachers</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+    <!-- Alert Placeholder -->
+    <div id="alert-placeholder" class="mt-3"></div>
+    <h2>Teachers</h2>
+
+    <div class="row">
+        <!-- Add Teacher Button -->
+        <div class="col-md-4">
+        </div>
+        <div class="col-md-8 text-right">
+            <button type="button" class="btn btn-primary mb-3" data-toggle="modal" data-target="#addTeacherModal">
+                + Add Teacher
+            </button>
+        </div>
+    </div>
+
+
+    <!-- Add Teacher Modal -->
+    <div class="modal fade" id="addTeacherModal" tabindex="-1" role="dialog" aria-labelledby="addTeacherModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addTeacherModalLabel">Add Teacher</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <label for="addFirstName" class="form-label">First Name</label>
+                            <input type="text" class="form-control" id="addFirstName" name="addFirstName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="addLastName" class="form-label">Last Name</label>
+                            <input type="text" class="form-control" id="addLastName" name="addLastName" required>
+                        </div>
+
+                        <button type="button" class="btn btn-primary" onclick="addTeacher()">Submit</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editModalLabel">Edit Teacher</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="editForm" onsubmit="submitEditForm(event)">
+                        <input type="hidden" id="editId" name="id"/>
+                        <div class="form-group">
+                            <label for="editFirstName">First Name:</label>
+                            <input type="text" class="form-control" id="editFirstName" name="firstName" required/>
+                        </div>
+                        <div class="form-group">
+                            <label for="editLastName">Last Name:</label>
+                            <input type="text" class="form-control" id="editLastName" name="lastName" required/>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Save changes</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Delete Teacher</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete this teacher?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" onclick="deleteTeacher()">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Username</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- Loop through teachers and populate table rows -->
+        <tr th:each="teacher : ${teachers}" th:data-id="${teacher.id}" th:data-firstname="${teacher.firstName}"
+            th:data-lastname="${teacher.lastName}">
+            <td th:text="${teacher.id}"></td>
+            <td th:text="${teacher.username}"></td>
+            <td th:text="${teacher.firstName}"></td>
+            <td th:text="${teacher.lastName}"></td>
+            <td>
+                <div class="btn-group" role="group" aria-label="Basic example">
+                    <a href="#" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#editModal">Edit</a>
+                    <a href="#" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteModal">Delete</a>
+                    <a th:href="@{/admins/teachers/{id}/assign-groups(id=${teacher.id})}" class="btn btn-info btn-sm">Assign Group</a>
+                    <a th:href="@{/admins/teachers/{id}/unassign-groups(id=${teacher.id})}" class="btn btn-warning btn-sm">Unassign Group</a>
+                </div>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+<script>
+    $(document).ready(function() {
+        // Edit Modal
+        $('#editModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var id = button.closest('tr').data('id');
+            var firstName = button.closest('tr').data('firstname');
+            var lastName = button.closest('tr').data('lastname');
+
+            var modal = $(this);
+            modal.find('#editId').val(id);
+            modal.find('#editFirstName').val(firstName);
+            modal.find('#editLastName').val(lastName);
+        });
+
+        // Delete Modal
+        $('#deleteModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var id = button.closest('tr').data('id');
+            $('#deleteModal').data('id', id);
+        });
+
+        // Add Teacher Modal
+        $('#addTeacherModal').on('show.bs.modal', function (event) {
+            var modal = $(this);
+            modal.find('#addFirstName').val('');
+            modal.find('#addLastName').val('');
+        });
+
+        // Assign Group Modal
+        $('#assignGroupModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var id = button.closest('tr').data('id');
+
+            var modal = $(this);
+            modal.find('#assignTeacherId').val(id);
+        });
+    });
+
+    function deleteTeacher() {
+        var id = $('#deleteModal').data('id');
+        $.ajax({
+            url: '/admins/teachers/' + id,
+            type: 'DELETE',
+            success: function(result) {
+                $('#deleteModal').modal('hide');
+                // window.location = "/admins/teachers";
+                location.reload();
+                showAlert('Teacher deleted successfully!', 'success');
+            },
+            error: function(e) {
+                showAlert('Error deleting teacher. Please try again.', 'danger');
+                console.log(e);
+            }
+        });
+    }
+
+    function submitEditForm(event) {
+        event.preventDefault();
+        var id = $('#editId').val();
+        var firstName = $('#editFirstName').val();
+        var lastName = $('#editLastName').val();
+
+        $.ajax({
+            url: '/admins/teachers/' + id,
+            type: 'PUT',
+            data: {
+                id: id,
+                firstName: firstName,
+                lastName: lastName,
+            },
+            success: function(result) {
+                $('#editModal').modal('hide');
+                showAlert('Teacher updated successfully!', 'success');
+                location.reload();
+                // window.location = "/admins/teachers";
+                location.reload();
+
+            },
+            error: function(e) {
+                showAlert('Error updating teacher. Please try again.', 'danger');
+                console.log(e);
+            }
+        });
+    }
+
+    function addTeacher() {
+        var firstName = $('#addFirstName').val();
+        var lastName = $('#addLastName').val();
+
+        $.ajax({
+            url: '/admins/teachers',
+            type: 'POST',
+            data: {
+                firstName: firstName,
+                lastName: lastName,
+            },
+            success: function(result) {
+                $('#addTeacherModal').modal('hide');
+                showAlert('Teacher added successfully!', 'success');
+                location.reload();
+            },
+            error: function(e) {
+                showAlert('Error adding teacher. Please try again.', 'danger');
+                console.log(e);
+            }
+        });
+    }
+
+    function assignGroups(event) {
+        event.preventDefault();
+        var teacherId = $('#assignTeacherId').val();
+        var groupIds = $('#groupSelect').val(); // Get selected group IDs as an array
+
+        $.ajax({
+            url: '/admins/teachers/' + teacherId + '/assign-groups',
+            type: 'POST',
+            traditional: true, // To ensure array is sent correctly
+            data: {
+                groupIds: groupIds
+            },
+            success: function(result) {
+                $('#assignGroupModal').modal('hide');
+                showAlert('Groups assigned successfully!', 'success');
+                location.reload();
+            },
+            error: function(e) {
+                showAlert('Error assigning groups. Please try again.', 'danger');
+                console.log(e);
+            }
+        });
+    }
+
+    function showAlert(message, type) {
+        var alertHtml = '<div class="alert alert-' + type + ' alert-dismissible fade show" role="alert">' +
+            message +
+            '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
+            '<span aria-hidden="true">&times;</span>' +
+            '</button>' +
+            '</div>';
+        $('#alert-placeholder').html(alertHtml);
+
+        // Store the alert message and type in localStorage
+        localStorage.setItem('alertMessage', message);
+        localStorage.setItem('alertType', type);
+
+        // Auto-dismiss alert after 5 seconds
+        setTimeout(function() {
+            $(".alert").alert('close');
+        }, 5000); // 5 seconds delay
+    }
+
+    $(document).ready(function() {
+        // Check if there's a stored alert and display it
+        var storedMessage = localStorage.getItem('alertMessage');
+        var storedType = localStorage.getItem('alertType');
+        if (storedMessage && storedType) {
+            showAlert(storedMessage, storedType);
+            localStorage.removeItem('alertMessage');
+            localStorage.removeItem('alertType');
+        }
+    });
+
+
+</script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

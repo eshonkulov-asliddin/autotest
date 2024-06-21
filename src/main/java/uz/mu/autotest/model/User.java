@@ -1,49 +1,42 @@
 package uz.mu.autotest.model;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import lombok.Data;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.security.core.userdetails.UserDetails;
+import lombok.Setter;
 
 import java.util.Set;
 
 @Entity
-@Data
+@Inheritance(strategy = InheritanceType.JOINED)
+@Getter
+@Setter
 @NoArgsConstructor
-public class User implements UserDetails {
+@AllArgsConstructor
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @OneToMany(fetch= FetchType.EAGER)
-    private Set<Authority> authorities;
-
-    private String password;
-
-    private String name;
-
+    protected Long id;
+    @ElementCollection(fetch = FetchType.LAZY)
+    @Enumerated(EnumType.STRING)
+    protected Set<Role> roles;
     @Column(unique = true)
-    private String username;
-
-    private boolean accountNonExpired;
-
-    private boolean accountNonLocked;
-
-    private boolean credentialsNonExpired;
-
-    private String provider;
-
-    private String providerId;
-
-    private boolean enabled;
-
-    private AuthProvider authProvider;
+    protected String username;
+    protected String password;
+    protected String firstName;
+    protected String lastName;
+    protected boolean isActive;
 
 }

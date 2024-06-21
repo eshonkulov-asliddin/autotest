@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Groups</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+
+</head>
+<body>
+<div class="container">
+  <!-- Alert Placeholder -->
+  <div id="alert-placeholder" class="mt-3"></div>
+  <h2>Groups</h2>
+
+  <!-- Button to trigger Add Group Modal -->
+  <button type="button" class="btn btn-primary mb-3" data-toggle="modal" data-target="#addGroupModal">
+    + Create New Group
+  </button>
+  <!-- Add Group Modal -->
+  <div class="modal fade" id="addGroupModal" tabindex="-1" role="dialog" aria-labelledby="addGroupModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="addGroupModalLabel">Add Group</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form>
+            <div class="form-group">
+              <label for="addGroupName" class="form-label">Group Name</label>
+              <input type="text" class="form-control" id="addGroupName" name="addGroupName" required>
+            </div>
+            <button type="button" class="btn btn-primary" onclick="addGroup()">Submit</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Group Modal -->
+  <div class="modal fade" id="editGroupModal" tabindex="-1" role="dialog" aria-labelledby="editGroupModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editGroupModalLabel">Edit Group</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="editGroupForm" onsubmit="submitEditGroupForm(event)">
+            <input type="hidden" id="editGroupId" name="id"/>
+            <div class="form-group">
+              <label for="editGroupName">Group Name</label>
+              <input type="text" class="form-control" id="editGroupName" name="name" required/>
+            </div>
+            <button type="submit" class="btn btn-primary">Save changes</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Group Modal -->
+  <div class="modal fade" id="deleteGroupModal" tabindex="-1" role="dialog" aria-labelledby="deleteGroupModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="deleteGroupModalLabel">Delete Group</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to delete this group?</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-danger" onclick="deleteGroup()">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <table class="table table-striped">
+    <thead>
+    <tr>
+      <th>ID</th>
+      <th>Group Name</th>
+      <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="group : ${groups}" th:data-id="${group.id}" th:data-name="${group.name}">
+      <td th:text="${group.id}"></td>
+      <td th:text="${group.name}"></td>
+      <td>
+        <div class="btn-group" role="group" aria-label="Basic example">
+          <a href="#" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#editGroupModal">Edit</a>
+          <a href="#" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteGroupModal">Delete</a>
+        </div>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- jQuery and Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+<!-- Bootstrap Select JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.14.0-beta2/js/bootstrap-select.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // Edit Group Modal
+        $('#editGroupModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var id = button.closest('tr').data('id');
+            var name = button.closest('tr').data('name');
+
+            var modal = $(this);
+            modal.find('#editGroupId').val(id);
+            modal.find('#editGroupName').val(name);
+        });
+
+        // Delete Group Modal
+        $('#deleteGroupModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var id = button.closest('tr').data('id');
+            $('#deleteGroupModal').data('id', id);
+        });
+
+        // Add Group Modal
+        $('#addGroupModal').on('show.bs.modal', function (event) {
+            var modal = $(this);
+            modal.find('#addGroupName').val('');
+        });
+    });
+
+    function deleteGroup() {
+        var id = $('#deleteGroupModal').data('id');
+        $.ajax({
+            url: '/admins/groups/' + id,
+            type: 'DELETE',
+            success: function(result) {
+                $('#deleteGroupModal').modal('hide');
+                window.location.href = "/admins/groups";
+                showAlert('Group deleted successfully', 'success');
+            },
+            error: function(e) {
+              console.log(e);
+              showAlert('Error deleting group, try again', 'danger');
+            }
+        });
+    }
+
+    function submitEditGroupForm(event) {
+        event.preventDefault();
+        var id = $('#editGroupId').val();
+        var name = $('#editGroupName').val();
+
+        $.ajax({
+            url: '/admins/groups/' + id,
+            type: 'PUT',
+            data: {
+                id: id,
+                name: name
+            },
+            success: function(result) {
+                $('#editGroupModal').modal('hide');
+                location.reload();
+                window.location.href = "/admins/groups";
+                showAlert('Group updated successfull', 'success');
+            },
+            error: function(e) {
+              console.log(e);
+              showAlert('Error updating group, try again', 'danger');
+            }
+        });
+    }
+
+    function addGroup() {
+        var groupName = $('#addGroupName').val();
+
+        $.ajax({
+            url: '/admins/groups',
+            type: 'POST',
+            data: {
+                groupName: groupName
+            },
+            success: function(result) {
+                $('#addGroupModal').modal('hide');
+                location.reload();
+                window.location.href = "/admins/groups";
+                showAlert('Group added successfully', 'success');
+            },
+            error: function(e) {
+                console.log(e);
+                showAlert('Error while adding group, try again', 'danger');
+            }
+        });
+    }
+
+    function showAlert(message, type) {
+        var alertHtml = '<div class="alert alert-' + type + ' alert-dismissible fade show" role="alert">' +
+            message +
+            '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
+            '<span aria-hidden="true">&times;</span>' +
+            '</button>' +
+            '</div>';
+        $('#alert-placeholder').html(alertHtml);
+
+        // Store the alert message and type in localStorage
+        localStorage.setItem('alertMessage', message);
+        localStorage.setItem('alertType', type);
+
+        // Auto-dismiss alert after 5 seconds
+        setTimeout(function() {
+            $(".alert").alert('close');
+        }, 5000); // 5 seconds delay
+    }
+
+    $(document).ready(function() {
+        // Check if there's a stored alert and display it
+        var storedMessage = localStorage.getItem('alertMessage');
+        var storedType = localStorage.getItem('alertType');
+        if (storedMessage && storedType) {
+            showAlert(storedMessage, storedType);
+            localStorage.removeItem('alertMessage');
+            localStorage.removeItem('alertType');
+        }
+    });
+
+</script>
+</body>
+</html>

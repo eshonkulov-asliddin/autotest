@@ -10,12 +10,20 @@
 <div class="container">
   <!-- Alert Placeholder -->
   <div id="alert-placeholder" class="mt-3"></div>
+  <a th:href="@{/admin/dashboard}" class="btn btn-outline-primary mb-3 btn-sm">&lt; Back</a>
+
   <h2>Groups</h2>
 
   <!-- Button to trigger Add Group Modal -->
-  <button type="button" class="btn btn-primary mb-3" data-toggle="modal" data-target="#addGroupModal">
-    + Create New Group
-  </button>
+  <div class="row">
+    <div class="col-md-4"></div>
+    <div class="col-md-8 text-right">
+        <button type="button" class="btn btn-primary mb-3 btn-sm" data-toggle="modal" data-target="#addGroupModal">
+          + Add New Group
+        </button>
+      </div>
+  </div>
+
   <!-- Add Group Modal -->
   <div class="modal fade" id="addGroupModal" tabindex="-1" role="dialog" aria-labelledby="addGroupModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
@@ -107,131 +115,141 @@
   </table>
 </div>
 
-<!-- jQuery and Bootstrap JS -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
-<!-- Bootstrap Select JS -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.14.0-beta2/js/bootstrap-select.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 <script>
-    $(document).ready(function() {
-        // Edit Group Modal
-        $('#editGroupModal').on('show.bs.modal', function (event) {
-            var button = $(event.relatedTarget);
-            var id = button.closest('tr').data('id');
-            var name = button.closest('tr').data('name');
+  const URLS = {
+      groups: '/admin/groups',
+      groupsId: function(id) { return `/admin/groups/${id}`; }
+  };
 
-            var modal = $(this);
-            modal.find('#editGroupId').val(id);
-            modal.find('#editGroupName').val(name);
-        });
+  const editGroupModal = '#editGroupModal';
+  const deleteGroupModal = '#deleteGroupModal';
+  const addGroupModal = '#addGroupModal';
+  const editGroupId = '#editGroupId';
+  const editGroupName = '#editGroupName';
+  const addGroupName = '#addGroupName';
+  const alertPlaceholder = '#alert-placeholder';
 
-        // Delete Group Modal
-        $('#deleteGroupModal').on('show.bs.modal', function (event) {
-            var button = $(event.relatedTarget);
-            var id = button.closest('tr').data('id');
-            $('#deleteGroupModal').data('id', id);
-        });
+  $(document).ready(function() {
+      // Edit Group Modal
+      $(editGroupModal).on('show.bs.modal', function (event) {
+          var button = $(event.relatedTarget);
+          var id = button.closest('tr').data('id');
+          var name = button.closest('tr').data('name');
 
-        // Add Group Modal
-        $('#addGroupModal').on('show.bs.modal', function (event) {
-            var modal = $(this);
-            modal.find('#addGroupName').val('');
-        });
-    });
+          var modal = $(this);
+          modal.find(editGroupId).val(id);
+          modal.find(editGroupName).val(name);
+      });
 
-    function deleteGroup() {
-        var id = $('#deleteGroupModal').data('id');
-        $.ajax({
-            url: '/admins/groups/' + id,
-            type: 'DELETE',
-            success: function(result) {
-                $('#deleteGroupModal').modal('hide');
-                window.location.href = "/admins/groups";
-                showAlert('Group deleted successfully', 'success');
-            },
-            error: function(e) {
+      // Delete Group Modal
+      $(deleteGroupModal).on('show.bs.modal', function (event) {
+          var button = $(event.relatedTarget);
+          var id = button.closest('tr').data('id');
+          $(deleteGroupModal).data('id', id);
+      });
+
+      // Add Group Modal
+      $(addGroupModal).on('show.bs.modal', function (event) {
+          var modal = $(this);
+          modal.find(addGroupName).val('');
+      });
+  });
+
+  function deleteGroup() {
+      var id = $(deleteGroupModal).data('id');
+      $.ajax({
+          url: URLS.groupsId(id),
+          type: 'DELETE',
+          success: function(result) {
+              $(deleteGroupModal).modal('hide');
+              window.location.href = URLS.groups;
+              showAlert('Group deleted successfully', 'success');
+          },
+          error: function(e) {
               console.log(e);
               showAlert('Error deleting group, try again', 'danger');
-            }
-        });
-    }
+          }
+      });
+  }
 
-    function submitEditGroupForm(event) {
-        event.preventDefault();
-        var id = $('#editGroupId').val();
-        var name = $('#editGroupName').val();
+  function submitEditGroupForm(event) {
+      event.preventDefault();
+      var id = $(editGroupId).val();
+      var name = $(editGroupName).val();
 
-        $.ajax({
-            url: '/admins/groups/' + id,
-            type: 'PUT',
-            data: {
-                id: id,
-                name: name
-            },
-            success: function(result) {
-                $('#editGroupModal').modal('hide');
-                location.reload();
-                window.location.href = "/admins/groups";
-                showAlert('Group updated successfull', 'success');
-            },
-            error: function(e) {
+      $.ajax({
+          url: URLS.groupsId(id),
+          type: 'PUT',
+          data: {
+              id: id,
+              name: name
+          },
+          success: function(result) {
+              $(editGroupModal).modal('hide');
+              window.location.href = URLS.groups;
+              showAlert('Group updated successfully', 'success');
+          },
+          error: function(e) {
               console.log(e);
               showAlert('Error updating group, try again', 'danger');
-            }
-        });
-    }
+          }
+      });
+  }
 
-    function addGroup() {
-        var groupName = $('#addGroupName').val();
+  function addGroup() {
+      var groupName = $(addGroupName).val();
 
-        $.ajax({
-            url: '/admins/groups',
-            type: 'POST',
-            data: {
-                groupName: groupName
-            },
-            success: function(result) {
-                $('#addGroupModal').modal('hide');
-                location.reload();
-                window.location.href = "/admins/groups";
-                showAlert('Group added successfully', 'success');
-            },
-            error: function(e) {
-                console.log(e);
-                showAlert('Error while adding group, try again', 'danger');
-            }
-        });
-    }
+      $.ajax({
+          url: URLS.groups,
+          type: 'POST',
+          data: {
+              groupName: groupName
+          },
+          success: function(result) {
+              $(addGroupModal).modal('hide');
+              window.location.href = URLS.groups;
+              showAlert('Group added successfully', 'success');
+          },
+          error: function(e) {
+              console.log(e);
+              showAlert('Error while adding group, try again', 'danger');
+          }
+      });
+  }
 
-    function showAlert(message, type) {
-        var alertHtml = '<div class="alert alert-' + type + ' alert-dismissible fade show" role="alert">' +
-            message +
-            '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
-            '<span aria-hidden="true">&times;</span>' +
-            '</button>' +
-            '</div>';
-        $('#alert-placeholder').html(alertHtml);
+  function showAlert(message, type) {
+      var alertHtml = '<div class="alert alert-' + type + ' alert-dismissible fade show" role="alert">' +
+          message +
+          '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
+          '<span aria-hidden="true">&times;</span>' +
+          '</button>' +
+          '</div>';
+      $(alertPlaceholder).html(alertHtml);
 
-        // Store the alert message and type in localStorage
-        localStorage.setItem('alertMessage', message);
-        localStorage.setItem('alertType', type);
+      // Store the alert message and type in localStorage
+      localStorage.setItem('alertMessage', message);
+      localStorage.setItem('alertType', type);
 
-        // Auto-dismiss alert after 5 seconds
-        setTimeout(function() {
-            $(".alert").alert('close');
-        }, 5000); // 5 seconds delay
-    }
+      // Auto-dismiss alert after 5 seconds
+      setTimeout(function() {
+          $(".alert").alert('close');
+      }, 5000); // 5 seconds delay
+  }
 
-    $(document).ready(function() {
-        // Check if there's a stored alert and display it
-        var storedMessage = localStorage.getItem('alertMessage');
-        var storedType = localStorage.getItem('alertType');
-        if (storedMessage && storedType) {
-            showAlert(storedMessage, storedType);
-            localStorage.removeItem('alertMessage');
-            localStorage.removeItem('alertType');
-        }
-    });
+  $(document).ready(function() {
+      // Check if there's a stored alert and display it
+      var storedMessage = localStorage.getItem('alertMessage');
+      var storedType = localStorage.getItem('alertType');
+      if (storedMessage && storedType) {
+          showAlert(storedMessage, storedType);
+          localStorage.removeItem('alertMessage');
+          localStorage.removeItem('alertType');
+      }
+  });
+</script>
 
 </script>
 </body>

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <title>Home Page</title>
   <!-- Bootstrap CSS -->
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
 <div class="container mt-5">
@@ -12,7 +12,8 @@
     <div th:if="${#lists.isEmpty(courses)}" class="col-md-12 mb-4 text-center">
       <h2>No courses yet</h2>
     </div>
-    <div th:if="${!#lists.isEmpty(courses)}">
+  </div>
+  <div class="row">
       <div class="col-md-4 mb-4" th:each="course : ${courses}">
         <div class="card">
           <div class="card-body">
@@ -22,8 +23,8 @@
           </div>
         </div>
       </div>
-    </div>
   </div>
+
 
 
 </div>

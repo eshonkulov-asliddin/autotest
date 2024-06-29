@@ -9,6 +9,8 @@
 <div class="container">
     <!-- Alert Placeholder -->
     <div id="alert-placeholder" class="mt-3"></div>
+    <a th:href="@{/admin/dashboard}" class="btn btn-outline-primary mb-3 btn-sm">&lt; Back</a>
+
     <h2>Teachers</h2>
 
     <div class="row">
@@ -16,7 +18,7 @@
         <div class="col-md-4">
         </div>
         <div class="col-md-8 text-right">
-            <button type="button" class="btn btn-primary mb-3" data-toggle="modal" data-target="#addTeacherModal">
+            <button type="button" class="btn btn-primary mb-3 btn-sm" data-toggle="modal" data-target="#addTeacherModal">
                 + Add Teacher
             </button>
         </div>
@@ -124,8 +126,6 @@
                 <div class="btn-group" role="group" aria-label="Basic example">
                     <a href="#" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#editModal">Edit</a>
                     <a href="#" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteModal">Delete</a>
-                    <a th:href="@{/admins/teachers/{id}/assign-groups(id=${teacher.id})}" class="btn btn-info btn-sm">Assign Group</a>
-                    <a th:href="@{/admins/teachers/{id}/unassign-groups(id=${teacher.id})}" class="btn btn-warning btn-sm">Unassign Group</a>
                 </div>
             </td>
         </tr>
@@ -138,6 +138,12 @@
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 <script>
+
+    const URLS = {
+        teachers: '/admin/teachers',
+        teachersId: function(id) { return `/admin/teachers/${id}`; },
+    };
+
     $(document).ready(function() {
         // Edit Modal
         $('#editModal').on('show.bs.modal', function (event) {
@@ -166,24 +172,16 @@
             modal.find('#addLastName').val('');
         });
 
-        // Assign Group Modal
-        $('#assignGroupModal').on('show.bs.modal', function (event) {
-            var button = $(event.relatedTarget);
-            var id = button.closest('tr').data('id');
-
-            var modal = $(this);
-            modal.find('#assignTeacherId').val(id);
-        });
     });
 
     function deleteTeacher() {
         var id = $('#deleteModal').data('id');
         $.ajax({
-            url: '/admins/teachers/' + id,
+            url: URLS.teachersId(id),
             type: 'DELETE',
             success: function(result) {
                 $('#deleteModal').modal('hide');
-                // window.location = "/admins/teachers";
+                // window.location = URLS.teachers;
                 location.reload();
                 showAlert('Teacher deleted successfully!', 'success');
             },
@@ -201,7 +199,7 @@
         var lastName = $('#editLastName').val();
 
         $.ajax({
-            url: '/admins/teachers/' + id,
+            url: URLS.teachersId(id),
             type: 'PUT',
             data: {
                 id: id,
@@ -211,8 +209,7 @@
             success: function(result) {
                 $('#editModal').modal('hide');
                 showAlert('Teacher updated successfully!', 'success');
-                location.reload();
-                // window.location = "/admins/teachers";
+                // window.location = URLS.teachers;
                 location.reload();
 
             },
@@ -228,7 +225,7 @@
         var lastName = $('#addLastName').val();
 
         $.ajax({
-            url: '/admins/teachers',
+            url: URLS.teachers,
             type: 'POST',
             data: {
                 firstName: firstName,
@@ -241,30 +238,6 @@
             },
             error: function(e) {
                 showAlert('Error adding teacher. Please try again.', 'danger');
-                console.log(e);
-            }
-        });
-    }
-
-    function assignGroups(event) {
-        event.preventDefault();
-        var teacherId = $('#assignTeacherId').val();
-        var groupIds = $('#groupSelect').val(); // Get selected group IDs as an array
-
-        $.ajax({
-            url: '/admins/teachers/' + teacherId + '/assign-groups',
-            type: 'POST',
-            traditional: true, // To ensure array is sent correctly
-            data: {
-                groupIds: groupIds
-            },
-            success: function(result) {
-                $('#assignGroupModal').modal('hide');
-                showAlert('Groups assigned successfully!', 'success');
-                location.reload();
-            },
-            error: function(e) {
-                showAlert('Error assigning groups. Please try again.', 'danger');
                 console.log(e);
             }
         });

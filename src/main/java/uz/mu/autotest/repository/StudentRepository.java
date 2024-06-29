@@ -15,8 +15,11 @@ public interface StudentRepository extends PagingAndSortingRepository<Student, L
     @Query("SELECT s FROM Student s JOIN s.groups g WHERE g.id = :groupId")
     Page<Student> findStudentsByGroupId(Long groupId, Pageable pageable);
 
-    @Query("SELECT s FROM Student s WHERE s.oAuth2Login != NULL AND s.oAuth2Login = :loginName")
-    Optional<Student> findByOAuth2Login(String loginName);
+    @Query("SELECT s FROM Student s JOIN FETCH s.groups WHERE s.login = :login")
+    Optional<Student> findByLogin(String login);
 
     Optional<Student> findByUsername(String currentlyAuthorizedUserUsername);
+
+    @Query("SELECT COUNT(s) FROM Student s")
+    Long count();
 }

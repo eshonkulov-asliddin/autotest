@@ -10,9 +10,10 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
     @Query("SELECT g FROM Group g WHERE g.id IN :groupIds")
     List<Group> findByIdIn(List<Long> groupIds);
 
-    @Query("SELECT g FROM Group g WHERE g.id NOT IN (SELECT tg.id FROM Teacher t JOIN t.groups tg WHERE t.id = :id)")
-    List<Group> findGroupsNotAssignedToTeacher(Long id);
+    @Query("SELECT g FROM Group g WHERE g.id NOT IN (SELECT g.id FROM Course c JOIN c.groups g WHERE c.id = :courseId)")
+    List<Group> findGroupsNotAssignedToCourseId(Long courseId);
 
-    @Query("SELECT g FROM Group g WHERE g.id IN (SELECT tg.id FROM Teacher t JOIN t.groups tg WHERE t.id = :id)")
-    List<Group> findGroupsAssignedToTeacher(Long id);
+    @Query("SELECT g FROM Group g WHERE g.id IN (SELECT g.id FROM Course c JOIN c.groups g WHERE c.id = :courseId)")
+    List<Group> findGroupsAssignedToCourseId(Long courseId);
+
 }

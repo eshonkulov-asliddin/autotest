@@ -1,7 +1,7 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: ${MYSQL_HOST_URL}/autotest_db
+    url: ${MYSQL_HOST_URL}/autotest_new_db
     username: ${MYSQL_USERNAME}
     password: asldevMYSQL2002
   jpa:
@@ -21,7 +21,11 @@ spring:
           github:
             client-id: 999d329d2aca8b9e68d4
             client-secret: de358fd25a58c1c5f8d968dd04f9bf2228a6417a
-            scope: repo
+            scope: repo,workflow
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.thymeleaf: DEBUG
 
 server:
   port: 9091
@@ -29,3 +33,22 @@ server:
 github:
   api:
     url: https://api.github.com
+
+
+app:
+  admin:
+    adminsHtmlPage: /admin/admins.html
+    teachersHtmlPage: /teacher/teachers.html
+    studentsHtmlPage: /student/students.html
+    groupsHtmlPage: /group/groups.html
+    coursesHtmlPage: /course/courses.html
+    coursesAssignGroupFrom: /course/assign-groups-form.html
+    coursesUnassignGroupForm: /course/unassign-groups-form.html
+  teacher:
+    dashboardHtmlPage: /teacher/dashboard.html
+
+
+testResults:
+  destinationFolder: report
+  zipFileName: artifact.zip
+  xmlFileName: test-results.xml

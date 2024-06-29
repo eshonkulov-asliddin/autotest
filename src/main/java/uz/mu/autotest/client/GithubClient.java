@@ -60,6 +60,23 @@ public class GithubClient {
         return Optional.empty();
     }
 
+    public Optional<String> getLastActionRunDownloadArtifactUrl(String owner, String repo, String accessToken) {
+        String actionsRunsUrl = githubApiUrl + "/repos/" + owner + "/" + repo + "/actions/artifacts";
+        var headers = getHeaders(accessToken);
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+        ResponseEntity<String> actionsRunsResponse = restTemplate.exchange(actionsRunsUrl, HttpMethod.GET, entity, String.class);
+        String bodyJSON = actionsRunsResponse.getBody();
+        try {
+            JsonNode lastWorkflowRun = objectMapper.readTree(bodyJSON).get("artifacts").get(0);
+            long id = lastWorkflowRun.get("id").longValue();
+            String archiveDownloadUrl = lastWorkflowRun.get("archive_download_url").textValue();
+            return Optional.of(archiveDownloadUrl);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        return Optional.empty();
+    }
+
     public ResponseEntity<String> generateRepository(String labOwner, String templateRepoOwner, String templateRepo, String description, boolean doIncludeAllBranch, boolean isPrivate, String accessToken) {
         HttpHeaders headers = getHeaders(accessToken);
         String requestBody = generateRepoRequestBody(labOwner, templateRepo, description, doIncludeAllBranch, isPrivate);

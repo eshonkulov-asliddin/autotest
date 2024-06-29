@@ -3,26 +3,71 @@ const stompClient = new StompJs.Client({
 });
 
 
+function enableLoading(){
+    const submitButton = document.getElementById('submitTask');
+    submitButton.disabled = true;
+    const spinner = document.getElementById("submitTaskSpinner");
+    spinner.style.display = "inline-block";
+}
+
+function disableLoading(){
+    const submitButton = document.getElementById('submitTask');
+    submitButton.disabled = false;
+    const spinner = document.getElementById("submitTaskSpinner");
+    spinner.style.display = "none";
+    sessionStorage.removeItem('taskInProgress');
+    sessionStorage.removeItem('labId');
+    sessionStorage.setItem('callBuildAndTestRepository', 'false');
+}
+
+function reconnectIfNecessary() {
+    if (sessionStorage.getItem('taskInProgress') === 'true') {
+        enableLoading();
+        stompClient.activate();
+        // submit task websocket connection
+        stompClient.onConnect = (frame) => {
+            console.log('Connected: ' + frame);
+            stompClient.subscribe('/user/queue/attempts', (response) => {
+                console.log(JSON.parse(response.body));
+                addAccordionItem(JSON.parse(response.body))
+                disconnect();
+                disableLoading();
+            });
+        };
+    }
+}
+
+window.addEventListener('load', reconnectIfNecessary);
 function submitTask(callback) {
+    const labId = parseInt($("#submitTask").data("lab-id"));
+
+    enableLoading();
+    sessionStorage.setItem('taskInProgress', 'true');
+    sessionStorage.setItem('labId', labId);
+
     stompClient.activate();
     // submit task websocket connection
     stompClient.onConnect = (frame) => {
         console.log('Connected: ' + frame);
-        stompClient.subscribe('/user/topic/attempts', (response) => {
+        stompClient.subscribe('/user/queue/attempts', (response) => {
             console.log(JSON.parse(response.body));
             addAccordionItem(JSON.parse(response.body))
             disconnect();
+            disableLoading();
         });
         buildAndTestRepository();
     };
 
     stompClient.onWebSocketError = (error) => {
         console.error('Error with websocket', error);
+        disableLoading();
+
     };
 
     stompClient.onStompError = (frame) => {
         console.error('Broker reported error: ' + frame.headers['message']);
         console.error('Additional details: ' + frame.body);
+        disableLoading();
     };
 }
 
@@ -31,14 +76,14 @@ function startTask(callback) {
     // generate repository websocket connection
     stompClient.onConnect = (frame) => {
         console.log('Connected: ' + frame);
-        stompClient.subscribe('/user/topic/repositories', (response) => {
-            console.log(response)
+        stompClient.subscribe('/user/queue/repositories', (response) => {
             var userTakenLab = JSON.parse(response.body);
+            console.log(userTakenLab);
             const id = userTakenLab.id;
             const githubUrl = userTakenLab.githubUrl;
             const status = userTakenLab.status;
-            const courseId = userTakenLab.course.id;
-            const labId = userTakenLab.lab.id;
+            const courseId = userTakenLab.courseId;
+            const labId = userTakenLab.labId;
             console.log("Started Lab: ", userTakenLab);
             addRepositoryCard(githubUrl, labId);
             disconnect();

@@ -3,7 +3,7 @@ package uz.mu.autotest.converter.testsuite;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
-import uz.mu.autotest.extractor.attempt.model.TestSuite;
+import uz.mu.autotest.extractor.util.TestSuite;
 import uz.mu.autotest.model.TestSuiteEntity;
 
 @Component

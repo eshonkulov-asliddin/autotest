@@ -28,7 +28,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
 
         log.info("Authorities: {}", authentication.getAuthorities());
         if (authentication.getAuthorities().stream().anyMatch(authority -> authority.getAuthority().equals(Role.ADMIN.getAuthority()))) {
-            response.sendRedirect("/admins/dashboard");
+            response.sendRedirect("/admin/dashboard");
         } else if (authentication.getAuthorities().stream().anyMatch(authority -> authority.getAuthority().equals(Role.TEACHER.getAuthority()))) {
             response.sendRedirect("/teachers/dashboard");
         } else if (authentication.getAuthorities().stream().anyMatch(authority -> authority.getAuthority().equals(Role.STUDENT.getAuthority()))) {

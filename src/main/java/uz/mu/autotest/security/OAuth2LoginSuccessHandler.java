@@ -38,12 +38,12 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
         if (currentUser.isPresent() && currentUser.get().getRoles().contains(Role.STUDENT)) {
             Student student = currentUser.get();
             boolean updated = false;
-            if (student.getOAuth2Login() == null || student.getOAuth2Login().isEmpty()) {
-                student.setOAuth2Login(loginName);
+            if (student.getLogin() == null || student.getLogin().isEmpty()) {
+                student.setLogin(loginName);
                 updated = true;
             }
-            if (student.getOAuth2Name() == null || student.getOAuth2Name().isEmpty()) {
-                student.setOAuth2Name(oAuth2Name);
+            if (student.getLoginName() == null || student.getLoginName().isEmpty()) {
+                student.setLoginName(oAuth2Name);
                 updated = true;
             }
             if (updated) {

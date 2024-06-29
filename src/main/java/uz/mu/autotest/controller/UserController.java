@@ -15,7 +15,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import uz.mu.autotest.model.Course;
+import uz.mu.autotest.dto.course.CourseDto;
 import uz.mu.autotest.service.CourseService;
 
 import java.util.List;
@@ -59,7 +59,7 @@ public class UserController {
 
     @GetMapping
     public String home(Model model) {
-        List<Course> courses = courseService.getAllCourses();
+        List<CourseDto> courses = courseService.getAllCourses();
          model.addAttribute("courses", courses);
          return "home.html";
     }

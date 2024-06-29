@@ -16,7 +16,6 @@ import uz.mu.autotest.service.AttemptService;
 import uz.mu.autotest.service.LabService;
 import uz.mu.autotest.service.ReadmeService;
 import uz.mu.autotest.service.UserTakenLabService;
-import uz.mu.autotest.utils.ApiConst;
 import uz.mu.autotest.utils.GithubUrlParser;
 
 import java.util.List;
@@ -24,9 +23,12 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static uz.mu.autotest.controller.util.ApiConst.ADMIN_PREFIX;
+import static uz.mu.autotest.controller.util.ApiConst.LABS_ENDPOINT;
+
 @Controller
 @AllArgsConstructor
-@RequestMapping(path = ApiConst.LABS_ENDPOINT)
+@RequestMapping(path = ADMIN_PREFIX +LABS_ENDPOINT)
 @Slf4j
 public class LabController {
 

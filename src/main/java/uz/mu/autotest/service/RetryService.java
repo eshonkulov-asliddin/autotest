@@ -1,16 +1,21 @@
 package uz.mu.autotest.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import uz.mu.autotest.client.GithubClient;
 import uz.mu.autotest.exception.GetLastActionRunException;
+import uz.mu.autotest.extractor.util.TestSuite;
+import uz.mu.autotest.extractor.util.TestSuites;
 import uz.mu.autotest.model.Attempt;
+import uz.mu.autotest.model.TestSuiteEntity;
 import uz.mu.autotest.model.UserTakenLab;
+import uz.mu.autotest.processor.ArtifactProcessor;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -18,25 +23,43 @@ import java.util.concurrent.CompletableFuture;
 @RequiredArgsConstructor
 @Slf4j
 public class RetryService {
+
+    @Value("${testResults.destinationFolder}")
+    private String destinationFolder;
+    @Value("${testResults.zipFileName}")
+    private String zipFileName;
+    @Value("${testResults.xmlFileName}")
+    private String xmlFileName;
+
     private final GithubClient gitHubApiService;
     private final AttemptService attemptService;
-    private final SimpMessagingTemplate simpMessagingTemplate;
-    private final ObjectMapper objectMapper;
+    private final UserTakenLabService userTakenLabService;
+    private final ArtifactProcessor artifactProcessor;
+    private final ConversionService conversionService;
 
     @Async
     public CompletableFuture<Attempt> retryAction(String owner, String repo, String accessToken, UserTakenLab userTakenLab) {
+        log.info("Started retry action....");
         final int maxAttempts = 5;
         int attempts = 0;
-        long delayMillis = 30000; // Initial delay of 1 second
+        long delayMillis = 30000;
 
         while (attempts < maxAttempts) {
             try {
                 Thread.sleep(delayMillis);
 
                 Optional<Attempt> lastAttempt = gitHubApiService.getLastActionRun(owner, repo, accessToken);
-                if (lastAttempt.isPresent()) {
+                Optional<String> downloadUrl = gitHubApiService.getLastActionRunDownloadArtifactUrl(owner, repo, accessToken);
+                if (lastAttempt.isPresent() && downloadUrl.isPresent()) {
+                    // artifact processor
+                    TestSuites testSuites = artifactProcessor.processArtifact(downloadUrl.get(), accessToken, destinationFolder, zipFileName, xmlFileName);
+                    List<TestSuite> testsuite = testSuites.getTestsuite();
+                    TestSuite testSuite = testsuite.get(0);
+                    log.info("TestSuite: {}", testSuite);
                     Attempt attempt = lastAttempt.get();
-                    log.info("Last attempt {}", attempt);
+                    TestSuiteEntity testSuiteEntity = conversionService.convert(testSuite, TestSuiteEntity.class);
+                    attempt.setTestSuite(testSuiteEntity);
+                    testSuiteEntity.setAttempt(attempt);
                     attempt.setUserTakenLab(userTakenLab);
                     attemptService.addAttempt(attempt);
                     log.info("Successfully added new attempt {}", attempt);

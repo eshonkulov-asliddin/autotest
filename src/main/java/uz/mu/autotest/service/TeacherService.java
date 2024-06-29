@@ -2,12 +2,12 @@ package uz.mu.autotest.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import uz.mu.autotest.dto.teacher.AddTeacherRequest;
 import uz.mu.autotest.dto.teacher.TeacherDto;
-import uz.mu.autotest.model.Group;
 import uz.mu.autotest.model.Role;
 import uz.mu.autotest.model.Teacher;
 import uz.mu.autotest.repository.TeacherRepository;
@@ -19,6 +19,7 @@ import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class TeacherService {
 
     private final TeacherRepository teacherRepository;
@@ -48,6 +49,11 @@ public class TeacherService {
                 .toList();
     }
 
+    public Long getCount() {
+        log.info("Getting teachers count...");
+        return teacherRepository.count();
+    }
+
     public void updateTeacher(Teacher teacher) {
         Teacher teacherById = getById(teacher.getId());
         // update firstName and lastName
@@ -58,7 +64,6 @@ public class TeacherService {
 
     public void deleteById(Long id) {
         Teacher teacher = getById(id);
-        teacher.getGroups().forEach(group -> group.removeTeacher(teacher));
         teacherRepository.delete(teacher);
     }
 
@@ -75,17 +80,8 @@ public class TeacherService {
         return teacherById.get();
     }
 
-    public void assignGroupsFor(Long id, List<Long> groupIds) {
-        Teacher teacher = getById(id);
-        List<Group> groups = groupService.getGroupsByIds(groupIds);
-        groups.forEach(group -> group.addTeacher(teacher));
-        teacherRepository.save(teacher);
-    }
-
-    public void unassignGroupsFor(Long id, List<Long> groupIds) {
-        Teacher teacher = getById(id);
-        List<Group> groups = groupService.getGroupsByIds(groupIds);
-        groups.forEach(group -> group.removeTeacher(teacher));
-        teacherRepository.save(teacher);
+    public Optional<Teacher> getByUsername(String username) {
+        log.info("Getting teacher by username: {}", username);
+        return teacherRepository.findByUsername(username);
     }
 }

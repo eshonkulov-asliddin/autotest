@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import uz.mu.autotest.client.GithubClient;
 import uz.mu.autotest.dto.SubmitTaskRequest;
+import uz.mu.autotest.dto.UserTakenLabDto;
 import uz.mu.autotest.exception.GenerateRepositoryException;
 import uz.mu.autotest.exception.NotFoundException;
 import uz.mu.autotest.model.Lab;
@@ -15,6 +16,7 @@ import uz.mu.autotest.model.UserTakenLab;
 import uz.mu.autotest.service.AuthService;
 import uz.mu.autotest.service.LabService;
 import uz.mu.autotest.service.RepositoryService;
+import uz.mu.autotest.service.StudentService;
 import uz.mu.autotest.service.UserService;
 import uz.mu.autotest.service.UserTakenLabService;
 import uz.mu.autotest.utils.GithubUrlParser;
@@ -30,9 +32,10 @@ public class GithubRepositoryService implements RepositoryService {
     private final AuthService authService;
     private final GithubClient githubClient;
     private final UserService userService;
+    private final StudentService studentService;
     private final UserTakenLabService userTakenLabService;
 
-    public UserTakenLab generateRepository(SubmitTaskRequest request, String labOwner, String accessToken) {
+    public UserTakenLabDto generateRepository(SubmitTaskRequest request, String labOwner, String accessToken) {
         Long labId = request.labId();
         if (labId == null ) throw new IllegalArgumentException();
         log.info("generate repository called for lab id: {}", labId);
@@ -60,12 +63,13 @@ public class GithubRepositoryService implements RepositoryService {
             userTakenLab.setStatus(LabStatus.STARTED);
             userTakenLab.setCourse(lab.get().getCourse());
             userTakenLab.setLab(lab.get());
-            userTakenLab.setUser(userService.getByUsername(labOwner).get());
+            log.info("labOwner: {}", labOwner);
+            userTakenLab.setUser(studentService.getStudentByOAuth2Login(labOwner).get());
             userTakenLabService.save(userTakenLab);
 
             log.info("Insert new Lab: {}", userTakenLab);
 
-            return userTakenLab;
+            return new UserTakenLabDto(userTakenLab.getId(), userTakenLab.getGithubUrl(), String.valueOf(userTakenLab.getStatus()), userTakenLab.getCourse().getId(), userTakenLab.getLab().getId(), userTakenLab.getUser().getId());
         }
         throw new GenerateRepositoryException("Failed to generate repository");
     }

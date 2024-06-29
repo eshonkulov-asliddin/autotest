@@ -2,6 +2,7 @@ package uz.mu.autotest.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 import uz.mu.autotest.dto.group.GroupDto;
@@ -14,6 +15,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class GroupService {
 
     private final GroupRepository groupRepository;
@@ -51,7 +53,6 @@ public class GroupService {
         }
         Group group = groupById.get();
         group.getStudents().forEach(student -> student.getGroups().remove(group));
-        group.getTeachers().forEach(teacher -> teacher.getGroups().remove(group));
         group.getCourses().forEach(course -> course.getGroups().remove(group));
         groupRepository.delete(group);
     }
@@ -60,16 +61,21 @@ public class GroupService {
         return groupRepository.findByIdIn(groupIds);
     }
 
-    public List<GroupDto> getGroupsNotAssignedToTeacher(Long id) {
-        List<Group> groups = groupRepository.findGroupsNotAssignedToTeacher(id);
-        return groups.stream()
+    public Long getCount() {
+        log.info("Getting groups count....");
+        return groupRepository.count();
+    }
+
+    public List<GroupDto> getGroupsNotAssignedToCourse(Long id) {
+        List<Group> groupsNotAssignedToCourseId = groupRepository.findGroupsNotAssignedToCourseId(id);
+        return groupsNotAssignedToCourseId.stream()
                 .map(group -> conversionService.convert(group, GroupDto.class))
                 .toList();
     }
 
-    public List<GroupDto> getGroupsAssignedToTeacher(Long id) {
-        List<Group> groups = groupRepository.findGroupsAssignedToTeacher(id);
-        return groups.stream()
+    public List<GroupDto> getGroupsAssignedToCourse(Long id) {
+        List<Group> groupsAssignedToCourseId = groupRepository.findGroupsAssignedToCourseId(id);
+        return groupsAssignedToCourseId.stream()
                 .map(group -> conversionService.convert(group, GroupDto.class))
                 .toList();
     }

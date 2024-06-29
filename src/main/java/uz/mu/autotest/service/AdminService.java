@@ -58,4 +58,8 @@ public class AdminService {
         }
         return adminById.get();
     }
+
+    public Long getCount() {
+        return adminRepository.count();
+    }
 }

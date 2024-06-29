@@ -2,9 +2,8 @@ package uz.mu.autotest.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import uz.mu.autotest.model.Attempt;
 import uz.mu.autotest.repository.AttemptRepository;
 
@@ -24,6 +23,7 @@ public class AttemptService {
         return byUserIdAndCourseId;
     }
 
+    @Transactional
     public void addAttempt(Attempt attempt) {
         log.info("Save attempt");
         attemptRepo.save(attempt);

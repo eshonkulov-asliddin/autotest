@@ -81,6 +81,12 @@ public class StudentService {
 
     }
 
+    public Optional<Student> getStudentByOAuth2Login(String loginName) {
+        Optional<Student> byOAuth2Login = studentRepository.findByLogin(loginName);
+        log.info("Student by oauth2 login {}: {}", loginName, byOAuth2Login);
+        return byOAuth2Login;
+    }
+
     public Student getById(Long id) {
         Optional<Student> studentById = studentRepository.findById(id);
         if (studentById.isEmpty()) {
@@ -88,5 +94,10 @@ public class StudentService {
         }
 
         return studentById.get();
+    }
+
+    public Long getCount() {
+        log.info("Getting students count...");
+        return studentRepository.count();
     }
 }

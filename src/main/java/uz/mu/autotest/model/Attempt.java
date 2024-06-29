@@ -8,6 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -22,8 +23,11 @@ public class Attempt {
     private String detailsUrl;
     @Enumerated(EnumType.STRING)
     private Result result;
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.MERGE)
     private UserTakenLab userTakenLab;
+
+    @OneToOne(mappedBy = "attempt", cascade = CascadeType.ALL, orphanRemoval = true)
+    private TestSuiteEntity testSuite;
 
     @Override
     public String toString() {

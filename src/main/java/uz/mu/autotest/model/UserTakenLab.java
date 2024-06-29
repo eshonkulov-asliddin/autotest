@@ -34,7 +34,7 @@ public class UserTakenLab {
                 "id=" + id +
                 ", githubUrl='" + githubUrl + '\'' +
                 ", status=" + status +
-                ", course=" + course.getCourseName() +
+                ", course=" + course.getName() +
                 ", lab=" + lab.getLabName() +
                 ", user=" + user.getUsername() +
                 '}';

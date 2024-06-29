@@ -41,7 +41,7 @@ public class Lab {
                 ", labName='" + labName + '\'' +
                 ", githubUrl='" + githubUrl + '\'' +
                 ", status=" + status +
-                ", course=" + course.getCourseName() +
+                ", course=" + course.getName() +
                 '}';
     }
 }

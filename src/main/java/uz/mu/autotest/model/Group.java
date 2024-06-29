@@ -43,14 +43,6 @@ public class Group {
     )
     private Set<Student> students = new HashSet<>();
 
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinTable(
-            name = "group_teacher",
-            joinColumns = @JoinColumn(name = "group_id"),
-            inverseJoinColumns = @JoinColumn(name = "teacher_id")
-    )
-    private Set<Teacher> teachers = new HashSet<>();
-
     public void addStudent(Student student) {
         this.students.add(student);
         student.getGroups().add(this);
@@ -61,13 +53,13 @@ public class Group {
         student.getGroups().remove(this);
     }
 
-    public void addTeacher(Teacher teacher) {
-        this.teachers.add(teacher);
-        teacher.getGroups().add(this);
+    public void addCourse(Course course) {
+        this.courses.add(course);
+        course.getGroups().add(this);
     }
 
-    public void removeTeacher(Teacher teacher) {
-        this.teachers.remove(teacher);
-        teacher.getGroups().remove(this);
+    public void removeCourse(Course course) {
+        this.courses.remove(course);
+        course.getGroups().remove(this);
     }
 }

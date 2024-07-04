@@ -22,9 +22,9 @@
                     <h2 class="card-title text-center mb-4">Assign Group Form</h2>
                     <form id="assignGroupForm">
                         <div class="form-group">
-                            <label for="teacherUsername">Teacher Username</label>
-                            <input type="hidden" id="teacherId" th:value="${teacher.id}">
-                            <input type="text" class="form-control" id="teacherUsername" th:value="${teacher.username}"
+                            <label for="courseName">Course Name</label>
+                            <input type="hidden" id="courseId" th:value="${course.id}">
+                            <input type="text" class="form-control" id="courseName" th:value="${course.name}"
                                    readonly>
                         </div>
                         <div class="form-group">
@@ -49,6 +49,10 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.14.0-beta2/js/bootstrap-select.min.js"></script>
 
 <script>
+    const URLS = {
+        courses: '/admin/courses',
+        assignGroupsForCourseId: function(id) { return `/admin/courses/${id}/assign-groups`; }
+    };
     $(document).ready(function() {
       // Initialize Bootstrap Selectpicker
       $('.selectpicker').selectpicker();
@@ -58,14 +62,15 @@
         event.preventDefault();
 
         // Get form values
-        var teacherId = $('#teacherId').val();
+        var courseId = $('#courseId').val();
         var selectedGroupIds = $('#groupSelect').val().map(function(id) {
           return parseInt(id);
         });
         console.log(selectedGroupIds);
-        // AJAX call to assign groups to teacher
+
+        // AJAX call to assign groups to course
         $.ajax({
-          url: '/admins/teachers/' + teacherId + '/assign-groups',
+          url: URLS.assignGroupsForCourseId(courseId),
           type: 'POST',
           contentType: 'application/json',
           data: JSON.stringify({ groupIds: selectedGroupIds }),
@@ -73,9 +78,9 @@
             // Reset form after submission
             $('#assignGroupForm')[0].reset();
             $('.selectpicker').selectpicker('refresh');
-            window.location.href = '/admins/teachers';
-            console.log('Groups assigned successfully:', response);
-            showAlert('Groups assigned successfully!', 'success');
+            window.location.href = URLS.courses;
+            console.log('Course assigned successfully:', response);
+            showAlert('Course assigned successfully!', 'success');
           },
           error: function(error) {
             console.error('Error assigning groups:', error);

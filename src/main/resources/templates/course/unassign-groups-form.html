@@ -19,12 +19,12 @@
             <div class="card">
                 <div class="card-body">
                     <a href="#" onclick="history.back();" class="btn btn-outline-primary mb-3">&lt; Back</a>
-                    <h2 class="card-title text-center mb-4">Unassign Group Form</h2>
+                    <h2 class="card-title text-center mb-4" style="color: red">Unassign Group Form</h2>
                     <form id="unassignGroupForm">
                         <div class="form-group">
-                            <label for="teacherUsername">Teacher Username</label>
-                            <input type="hidden" id="teacherId" th:value="${teacher.id}">
-                            <input type="text" class="form-control" id="teacherUsername" th:value="${teacher.username}"
+                            <label for="courseName">Course Name</label>
+                            <input type="hidden" id="courseId" th:value="${course.id}">
+                            <input type="text" class="form-control" id="courseName" th:value="${course.name}"
                                    readonly>
                         </div>
                         <div class="form-group">
@@ -34,7 +34,7 @@
                                 <option th:each="group : ${groups}" th:value="${group.id}" th:text="${group.name}"></option>
                             </select>
                         </div>
-                        <button type="submit" class="btn btn-primary btn-block">UnAssign Groups</button>
+                        <button type="submit" class="btn btn-danger btn-block">UnAssign Groups</button>
                     </form>
                 </div>
             </div>
@@ -49,6 +49,11 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.14.0-beta2/js/bootstrap-select.min.js"></script>
 
 <script>
+    const URLS = {
+        courses: '/admin/courses',
+        unassignGroupsForCourseId: function(id) { return `/admin/courses/${id}/unassign-groups`; }
+    };
+
     $(document).ready(function() {
       // Initialize Bootstrap Selectpicker
       $('.selectpicker').selectpicker();
@@ -58,14 +63,14 @@
         event.preventDefault();
 
         // Get form values
-        var teacherId = $('#teacherId').val();
+        var courseId = $('#courseId').val();
         var selectedGroupIds = $('#groupSelect').val().map(function(id) {
           return parseInt(id);
         });
         console.log(selectedGroupIds);
-        // AJAX call to assign groups to teacher
+        // AJAX call to assign groups to course
         $.ajax({
-          url: '/admins/teachers/' + teacherId + '/unassign-groups',
+          url: URLS.unassignGroupsForCourseId(courseId),
           type: 'POST',
           contentType: 'application/json',
           data: JSON.stringify({ groupIds: selectedGroupIds }),
@@ -73,9 +78,9 @@
             // Reset form after submission
             $('#unassignGroupForm')[0].reset();
             $('.selectpicker').selectpicker('refresh');
-            window.location.href = '/admins/teachers';
-            console.log('Groups unassigned successfully:', response);
-            showAlert('Groups unassigned successfully!', 'success');
+            window.location.href = URLS.courses;
+            console.log('Course unassigned successfully:', response);
+            showAlert('Course unassigned successfully!', 'success');
           },
           error: function(error) {
             console.error('Error unassigning groups:', error);

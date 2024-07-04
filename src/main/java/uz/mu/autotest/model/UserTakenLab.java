@@ -26,7 +26,7 @@ public class UserTakenLab {
     @ManyToOne
     private Lab lab;
     @ManyToOne
-    private User user;
+    private Student user;
 
     @Override
     public String toString() {

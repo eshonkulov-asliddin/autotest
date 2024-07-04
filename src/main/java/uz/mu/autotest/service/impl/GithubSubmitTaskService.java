@@ -30,6 +30,8 @@ public class GithubSubmitTaskService implements SubmitTaskService {
 
     public AttemptDto submitTask(SubmitTaskRequest request, String owner, String accessToken) {
         log.info("Started submit task....");
+
+        log.info("Retrieving Started Lab by id: {}", request.labId());
         Optional<UserTakenLab> userTakenLab = userTakenLabService.getById(request.labId());
         log.info("Retrieved Started Lab: {}", userTakenLab.get());
 
@@ -42,7 +44,7 @@ public class GithubSubmitTaskService implements SubmitTaskService {
             CompletableFuture<Attempt> attemptCompletableFuture = retryService.retryAction(owner, repo, accessToken, userTakenLab.get());
             Attempt attempt = attemptCompletableFuture.get();
             log.info("Last Attempt: {}", attempt);
-            return new AttemptDto(attempt.getId(), attempt.getRunNumber(), attempt.getDetailsUrl(), String.valueOf(attempt.getResult()), attempt.getUserTakenLab().getId(), attempt.getTestSuite());
+            return new AttemptDto(attempt.getId(), attempt.getRunNumber(), attempt.getDetailsUrl(), String.valueOf(attempt.getResult()), attempt.getUserTakenLab().getId(), attempt.getTestSuite().getId());
         }catch (GetLastActionRunException e){
             throw e;
         } catch (ExecutionException e) {

@@ -2,14 +2,13 @@ package uz.mu.autotest.controller;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import uz.mu.autotest.dto.lab.LabDto;
 import uz.mu.autotest.model.Attempt;
-import uz.mu.autotest.model.CustomOAuth2User;
 import uz.mu.autotest.model.Lab;
 import uz.mu.autotest.model.UserTakenLab;
 import uz.mu.autotest.service.AttemptService;
@@ -18,17 +17,18 @@ import uz.mu.autotest.service.ReadmeService;
 import uz.mu.autotest.service.UserTakenLabService;
 import uz.mu.autotest.utils.GithubUrlParser;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static uz.mu.autotest.controller.util.ApiConst.ADMIN_PREFIX;
 import static uz.mu.autotest.controller.util.ApiConst.LABS_ENDPOINT;
+import static uz.mu.autotest.controller.util.ApiConst.STUDENTS_PREFIX;
 
 @Controller
 @AllArgsConstructor
-@RequestMapping(path = ADMIN_PREFIX +LABS_ENDPOINT)
+@RequestMapping(path = STUDENTS_PREFIX +LABS_ENDPOINT)
 @Slf4j
 public class LabController {
 
@@ -38,16 +38,10 @@ public class LabController {
     private final ReadmeService readmeService;
 
     @GetMapping("/courses/{courseId}")
-    public String getLabsByCourseId(@PathVariable(name = "courseId") Long courseId, Model model) {
-
-        CustomOAuth2User oAuth2User = (CustomOAuth2User) SecurityContextHolder
-                .getContext()
-                .getAuthentication()
-                .getPrincipal();
-        String userName = oAuth2User.getLogin();
-
-        List<UserTakenLab> userTakenLabs = userTakenLabService.getLabsByCourseIdAndUserUsername(courseId, userName);
-        List<Lab> labsByCourseId = labService.getLabsByCourseId(courseId);
+    public String getLabsByCourseId(@PathVariable(name = "courseId") Long courseId, Principal principal, Model model) {
+        String username = principal.getName();
+        List<UserTakenLab> userTakenLabs = userTakenLabService.getLabsByCourseIdAndUserUsername(courseId, username);
+        List<LabDto> labsByCourseId = labService.getLabsByCourseId(username, courseId);
 
         log.info("userTakenLabs: {}", userTakenLabs);
 
@@ -57,8 +51,8 @@ public class LabController {
                 .collect(Collectors.toSet());
 
         // Filter out labs that are not taken by users
-        List<Lab> remainingLabs = labsByCourseId.stream()
-                .filter(lab -> !takenLabIds.contains(lab.getId()))
+        List<LabDto> remainingLabs = labsByCourseId.stream()
+                .filter(lab -> !takenLabIds.contains(lab.id()))
                 .toList();
 
         log.info("notStartedLabs: {}", remainingLabs);

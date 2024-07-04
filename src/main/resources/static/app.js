@@ -40,7 +40,7 @@ function reconnectIfNecessary() {
 window.addEventListener('load', reconnectIfNecessary);
 function submitTask(callback) {
     const labId = parseInt($("#submitTask").data("lab-id"));
-
+    console.log("lab id", labId)
     enableLoading();
     sessionStorage.setItem('taskInProgress', 'true');
     sessionStorage.setItem('labId', labId);

@@ -6,12 +6,19 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import uz.mu.autotest.dto.group.GroupDto;
+import uz.mu.autotest.dto.lab.AddLabRequest;
+import uz.mu.autotest.dto.lab.LabDto;
 import uz.mu.autotest.model.Course;
+import uz.mu.autotest.model.Lab;
 import uz.mu.autotest.service.CourseService;
 import uz.mu.autotest.service.GroupService;
+import uz.mu.autotest.service.LabService;
 import uz.mu.autotest.service.TeacherService;
 
 import java.security.Principal;
@@ -35,6 +42,7 @@ public class TeacherController {
     private final TeacherService teacherService;
     private final GroupService groupService;
     private final CourseService courseService;
+    private final LabService labService;
 
     @GetMapping("/dashboard")
     public String dashboard(@RequestParam(required=false) Long courseId, Principal principal, Model model) {
@@ -65,6 +73,21 @@ public class TeacherController {
         model.addAttribute(TEACHER_COURSES, allCourses);
         model.addAttribute(COURSES, !courses.isEmpty() ? courses : allCourses);
         model.addAttribute(GROUPS, groups);
+        return dashboardHtmlPage;
+    }
+
+    @PostMapping("/courses/{courseId}/labs")
+    public String addLab(@PathVariable("courseId") Long courseId, @RequestBody AddLabRequest request, Principal principal, Model model) {
+        String username = principal.getName();
+        labService.addLab(username, courseId, request);
+        return dashboardHtmlPage;
+    }
+
+    @GetMapping("/courses/{courseId}/labs")
+    public String seeLabs(@PathVariable("courseId") Long courseId, Principal principal, Model model) {
+        String username = principal.getName();
+        List<LabDto> labsByCourseId = labService.getLabsByCourseId(username, courseId);
+        model.addAttribute("labs", labsByCourseId);
         return dashboardHtmlPage;
     }
 }

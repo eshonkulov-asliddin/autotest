@@ -3,7 +3,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: ${MYSQL_HOST_URL}/autotest_new_db
     username: ${MYSQL_USERNAME}
-    password: asldevMYSQL2002
+    password: ${MYSQL_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: update
@@ -19,8 +19,8 @@ spring:
       client:
         registration:
           github:
-            client-id: 999d329d2aca8b9e68d4
-            client-secret: de358fd25a58c1c5f8d968dd04f9bf2228a6417a
+            client-id: CLIENT_ID
+            client-secret: CLIENT_SECRET
             scope: repo,workflow
 logging:
   level:

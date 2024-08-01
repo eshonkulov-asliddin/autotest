@@ -24,7 +24,7 @@ public class Attempt {
     @Enumerated(EnumType.STRING)
     private Result result;
     @ManyToOne(cascade = CascadeType.MERGE)
-    private UserTakenLab userTakenLab;
+    private StudentTakenLab studentTakenLab;
 
     @OneToOne(mappedBy = "attempt", cascade = CascadeType.ALL, orphanRemoval = true)
     private TestSuiteEntity testSuite;

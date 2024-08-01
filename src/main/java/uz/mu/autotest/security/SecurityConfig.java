@@ -7,6 +7,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -15,11 +16,11 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import uz.mu.autotest.model.Role;
 
 @Configuration
 @PropertySource("classpath:application.yml")
 @EnableWebSecurity
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
@@ -35,9 +36,6 @@ public class SecurityConfig {
                        auth
                                .requestMatchers("/login", "/app.js", "/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
                                .requestMatchers("/mu-autotest").permitAll()
-                               .requestMatchers("/admin/**").hasRole(String.valueOf(Role.ADMIN))
-                               .requestMatchers("/teachers/**").hasRole(String.valueOf(Role.TEACHER))
-                               .requestMatchers("/students/**").hasAnyAuthority("ROLE_STUDENT", "OAUTH2_USER")
                                .anyRequest().authenticated()
                     )
                 .formLogin(formLogin ->

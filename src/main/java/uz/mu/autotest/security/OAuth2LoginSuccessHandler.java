@@ -12,7 +12,7 @@ import uz.mu.autotest.model.CustomOAuth2User;
 import uz.mu.autotest.model.Role;
 import uz.mu.autotest.model.Student;
 import uz.mu.autotest.repository.StudentRepository;
-import uz.mu.autotest.service.AuthService;
+import uz.mu.autotest.service.impl.AuthService;
 
 import java.io.IOException;
 import java.util.Optional;

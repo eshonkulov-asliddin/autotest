@@ -9,7 +9,9 @@ import uz.mu.autotest.model.TestSuiteEntity;
 @Component
 @RequiredArgsConstructor
 public class TestSuiteToTestSuiteEntityConverter implements Converter<TestSuite, TestSuiteEntity> {
+
     private final TestCaseToTestCaseEntityConverter testCaseToTestCaseEntityConverter;
+
     @Override
     public TestSuiteEntity convert(TestSuite source) {
         TestSuiteEntity testSuiteEntity = new TestSuiteEntity();
@@ -26,4 +28,5 @@ public class TestSuiteToTestSuiteEntityConverter implements Converter<TestSuite,
         );
         return testSuiteEntity;
     }
+
 }

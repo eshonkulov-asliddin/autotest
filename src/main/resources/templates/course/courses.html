@@ -9,7 +9,7 @@
 <div class="container">
     <!-- Alert Placeholder -->
     <div id="alert-placeholder" class="mt-3"></div>
-    <a th:href="@{/admin/dashboard}" class="btn btn-outline-primary mb-3 btn-sm">&lt; Back</a>
+    <a th:href="@{/admins/dashboard}" class="btn btn-outline-primary mb-3 btn-sm">&lt; Back</a>
 
     <h2>Courses</h2>
 
@@ -127,8 +127,8 @@
                             More
                         </button>
                         <div class="dropdown-menu" aria-labelledby="btnGroupTeachers">
-                            <a th:href="@{/admin/courses/{id}/assign-groups(id=${course.id})}" class="btn btn-info btn-sm dropdown-item">Assign Group</a>
-                            <a th:href="@{/admin/courses/{id}/unassign-groups(id=${course.id})}" class="btn btn-warning btn-sm dropdown-item">Unassign Group</a>
+                            <a th:href="@{/courses/{id}/assign-groups(id=${course.id})}" class="btn btn-info btn-sm dropdown-item">Assign Group</a>
+                            <a th:href="@{/courses/{id}/unassign-groups(id=${course.id})}" class="btn btn-warning btn-sm dropdown-item">Unassign Group</a>
                         </div>
                     </div>
                 </div>
@@ -142,8 +142,8 @@
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
 <script>
     const URLS = {
-        courses: '/admin/courses',
-        coursesId: function(id) { return `/admin/courses/${id}`; }
+        courses: '/courses',
+        coursesId: function(id) { return `/courses/${id}`; }
     };
 
     const editCourseModal = '#editCourseModal';

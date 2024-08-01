@@ -9,7 +9,7 @@
 <div class="container">
     <!-- Alert Placeholder -->
     <div id="alert-placeholder" class="mt-3"></div>
-    <a th:href="@{/admin/dashboard}" class="btn btn-outline-primary mb-3 btn-sm">&lt; Back</a>
+    <a th:href="@{/admins/dashboard}" class="btn btn-outline-primary mb-3 btn-sm">&lt; Back</a>
 
     <h2>Teachers</h2>
 
@@ -140,8 +140,8 @@
 <script>
 
     const URLS = {
-        teachers: '/admin/teachers',
-        teachersId: function(id) { return `/admin/teachers/${id}`; },
+        teachers: '/teachers',
+        teachersId: function(id) { return `/teachers/${id}`; },
     };
 
     $(document).ready(function() {

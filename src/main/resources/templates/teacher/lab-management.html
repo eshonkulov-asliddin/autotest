@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Lab Management</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .btn-active, .btn-inactive {
+            width: 50%;
+        }
+        .completed-badge {
+            background-color: #28a745;
+            cursor: pointer;
+        }
+        .pending-badge {
+            background-color: yellow;
+            cursor: pointer;
+        }
+        .notStarted-badge {
+            background-color: #dc3545;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<div class="container mt-5">
+    <h2 class="mb-4">Lab Management</h2>
+    <div class="card">
+        <div class="card-header">
+            <h4>Labs for Course: <span class="course-name" th:text="${course.name}">Course Name</span></h4>
+            <button class="btn btn-primary" data-toggle="modal" data-target="#groupLabAssignmentModal">Assign Lab to Group</button>
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered table-hover">
+                <thead class="thead-dark">
+                <tr>
+                    <th>Lab Name</th>
+                    <th>Completed Students</th>
+                    <th>Action</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="lab: ${labsAssignedToGroup}">
+                    <td th:text="${lab.labName}">Lab 1</td>
+                    <td>
+                        <span class="badge badge-pill completed-badge"
+                              data-toggle="modal"
+                              data-target="#completedModal"
+                              th:onclick="'showStudents(' + ${lab.id} + ', ' + ${group.id} + ', \'completed\')'">Completed</span>
+                        <span class="badge badge-pill pending-badge"
+                              data-toggle="modal"
+                              data-target="#pendingModal"
+                              th:onclick="'showStudents(' + ${lab.id} + ', ' + ${group.id} + ', \'pending\')'">Pending</span>
+
+                        <span class="badge badge-pill notStarted-badge"
+                              data-toggle="modal"
+                              data-target="#notStartedModal"
+                              th:onclick="'showStudents(' + ${lab.id} + ', ' + ${group.id} + ', \'notStarted\')'">Not Started</span>
+
+
+                    </td>
+                    <td>
+                        <button class="btn btn-success btn-active">See Attempts</button>
+                    </td>
+                </tr>
+                <!-- More rows as needed -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Completed Students Modal -->
+<div class="modal fade" id="completedModal" tabindex="-1" aria-labelledby="completedModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="completedModalLabel">Completed Students for <span id="completedLabName"></span></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <ul id="completedStudentsList" class="list-group">
+                    <!-- Completed students list will be populated here -->
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Pending Students Modal -->
+<div class="modal fade" id="pendingModal" tabindex="-1" aria-labelledby="pendingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="pendingModalLabel">Pending Students for <span id="pendingLabName"></span></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <ul id="pendingStudentsList" class="list-group">
+                    <!-- Pending students list will be populated here -->
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- NotStarted Students Modal -->
+<div class="modal fade" id="notStartedModal" tabindex="-1" aria-labelledby="pendingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="notStartedLabel">Pending Students for <span id="notStartedLabName"></span></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <ul id="notStartedStudentsList" class="list-group">
+                    <!-- Pending students list will be populated here -->
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Assign Lab to Group Modal -->
+<div class="modal fade" id="groupLabAssignmentModal" tabindex="-1" aria-labelledby="groupLabAssignmentModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="groupLabAssignmentModalLabel">Assign Lab to Group</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="groupLabAssignmentForm">
+                    <!-- Course and Group display as text -->
+                    <div class="form-group">
+                        <label for="courseId">Course</label>
+                        <input type="hidden" id="courseId" th:value="${course.id}">
+                        <input type="text" class="form-control" id="courseName" th:value="${course.name}" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="groupName">Group</label>
+                        <input type="hidden" id="groupId" th:value="${group.id}">
+                        <input type="text" class="form-control" id="groupName" th:value="${group.name}" readonly>
+                    </div>
+                    <!-- Lab selection -->
+                    <div class="form-group">
+                        <label for="labId">Lab</label>
+                        <select class="form-control" id="labId">
+                            <option th:each="lab: ${labsNotAssignedToGroup}" th:value="${lab.id}" th:text="${lab.name}"></option>
+                        </select>
+                    </div>
+                    <!-- Deadline input -->
+                    <div class="form-group">
+                        <label for="deadline">Deadline</label>
+                        <input type="datetime-local" class="form-control" id="deadline" required>
+                    </div>
+                    <!-- Submit button -->
+                    <button type="button" onclick="submitForm()" class="btn btn-primary">Save</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+<script>
+    function showStudents(labId, groupId, status) {
+        $.ajax({
+            type: 'GET',
+            url: `/labs/${labId}/statistics?groupId=${groupId}`,
+            success: function (data) {
+                if (status === 'completed') {
+                    document.getElementById('completedLabName').innerText = `Lab ${labId}`;
+                    const completedList = document.getElementById('completedStudentsList');
+                    completedList.innerHTML = '';
+                    data.completedStudents.forEach(student => {
+                        const listItem = document.createElement('li');
+                        listItem.className = 'list-group-item';
+                        listItem.innerText = student.firstName+ ' ' +student.lastName;
+                        completedList.appendChild(listItem);
+                    });
+                } else if (status === 'pending') {
+                    document.getElementById('pendingLabName').innerText = `Lab ${labId}`;
+                    const pendingList = document.getElementById('pendingStudentsList');
+                    pendingList.innerHTML = '';
+                    data.pendingStudents.forEach(student => {
+                        const listItem = document.createElement('li');
+                        listItem.className = 'list-group-item';
+                        listItem.innerText = student.firstName+ ' ' +student.lastName;
+                        pendingList.appendChild(listItem);
+                    });
+                }else if (status === 'notStarted') {
+                    document.getElementById('notStartedLabName').innerText = `Lab ${labId}`;
+                    const pendingList = document.getElementById('notStartedStudentsList');
+                    pendingList.innerHTML = '';
+                    data.pendingStudents.forEach(student => {
+                        const listItem = document.createElement('li');
+                        listItem.className = 'list-group-item';
+                        listItem.innerText = student.firstName+ ' ' +student.lastName;
+                        pendingList.appendChild(listItem);
+                    });
+                }
+            },
+            error: function (error) {
+                console.error('Error fetching lab statistics:', error);
+            }
+        });
+    }
+
+    function submitForm() {
+        const labId = document.getElementById('labId').value;
+        const deadline = document.getElementById('deadline').value;
+        const courseId = document.getElementById('courseId').value;
+        const groupId = document.getElementById('groupId').value;
+
+        const formData = {
+            labId: labId,
+            deadline: deadline,
+            courseId: courseId,
+            groupId: groupId
+        };
+
+        $.ajax({
+            type: 'POST',
+            url: '/assignLabToGroup',
+            contentType: 'application/json',
+            data: JSON.stringify(formData),
+            success: function () {
+                alert('Lab assigned successfully');
+                location.reload();
+            },
+            error: function (error) {
+                console.error('Error assigning lab:', error);
+                alert('Error assigning lab');
+            }
+        });
+    }
+</script>
+</body>
+</html>

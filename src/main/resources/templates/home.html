@@ -12,6 +12,9 @@
     <div th:if="${#lists.isEmpty(courses)}" class="col-md-12 mb-4 text-center">
       <h2>No courses yet</h2>
     </div>
+    <div th:if="${!#lists.isEmpty(courses)}" class="col-md-12 mb-4 text-center">
+      <h2>Courses</h2>
+    </div>
   </div>
   <div class="row">
       <div class="col-md-4 mb-4" th:each="course : ${courses}">
@@ -19,7 +22,7 @@
           <div class="card-body">
             <h5 class="card-title" th:text="${course.id}">Title</h5>
             <p class="card-text" th:text="${course.name}">Description</p>
-            <a th:href="@{'/students/labs/courses/' + ${course.id}}" class="btn btn-dark">See Labs</a>
+            <a th:href="@{'/labs/courses/' + ${course.id}}" class="btn btn-dark">See Labs</a>
           </div>
         </div>
       </div>

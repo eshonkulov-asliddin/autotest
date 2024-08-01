@@ -255,12 +255,12 @@ function buildAccordionItem(attempt) {
     body.className = 'accordion-body';
     body.innerHTML = `You can see details <a href="${attempt.detailsUrl}" target="_blank">here</a>`;
 
-    if (attempt.testSuiteDto && attempt.testSuiteDto.testCases && attempt.testSuiteDto.testCases.length > 0) {
+    if (attempt.testResultDto && attempt.testResultDto.testCases && attempt.testResultDto.testCases.length > 0) {
         const nestedAccordion = document.createElement('div');
         nestedAccordion.className = 'accordion accordion-flush';
         nestedAccordion.id = `nestedAccordion_${attempt.id}`;
 
-        attempt.testSuiteDto.testCases.forEach(testCase => {
+        attempt.testResultDto.testCases.forEach(testCase => {
             const nestedItem = buildNestedAccordionItem(testCase, attempt.id);
             nestedAccordion.appendChild(nestedItem);
         });
@@ -310,8 +310,8 @@ function buildNestedAccordionItem(testCase, parentAttemptId) {
     if (testCase.failure) {
         const failureDetails = document.createElement('div');
         failureDetails.innerHTML = `
-            <p>Failure Message: ${testCase.failure.message}</p>
-            <pre>${testCase.failure.content}</pre>
+            <p>Failure Message: ${testCase.failure.type}</p>
+            <pre>${testCase.failure.details}</pre>
         `;
         body.appendChild(failureDetails);
     } else {

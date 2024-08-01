@@ -5,23 +5,26 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
-import jakarta.persistence.TableGenerator;
+import jakarta.persistence.Table;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
 
 @Entity
-@NoArgsConstructor
+@Inheritance(strategy = InheritanceType.JOINED)
+@Table(name = "test_results")
 @Getter
 @Setter
-public class TestSuiteEntity {
+public abstract class TestResults {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.TABLE, generator = "test_suite_gen")
-    @TableGenerator(name = "test_suite_gen", table = "sequence_table", pkColumnName = "seq_name", valueColumnName = "seq_value", pkColumnValue = "test_suite_seq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
     private Long id;
     private String name;
     private int errors;
@@ -29,13 +32,11 @@ public class TestSuiteEntity {
     private int skipped;
     private int tests;
     private double time;
-    private String timestamp;
-    private String hostname;
 
-    @OneToMany(mappedBy = "testSuite", cascade = CascadeType.ALL)
-    private List<TestCaseEntity> testCases;
+    @OneToMany(mappedBy = "testResults", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TestCaseEntity> testCaseEntities;
 
     @OneToOne
     private Attempt attempt;
-}
 
+}

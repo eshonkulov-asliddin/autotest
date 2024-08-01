@@ -1,6 +1,6 @@
 package uz.mu.autotest.dto;
 
-public record UserTakenLabDto (
+public record StudentTakenLabDto(
        Long id,
        String githubUrl,
        String status,

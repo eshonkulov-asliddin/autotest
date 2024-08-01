@@ -9,6 +9,6 @@ import uz.mu.autotest.model.FailureEntity;
 public class FailureEntityToFailureDtoConverter implements Converter<FailureEntity, FailureDto> {
     @Override
     public FailureDto convert(FailureEntity source) {
-        return new FailureDto(source.getMessage(), source.getContent());
+        return new FailureDto(source.getMessage(), source.getDetails());
     }
 }

@@ -1,4 +1,4 @@
-package uz.mu.autotest.service;
+package uz.mu.autotest.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +12,7 @@ import uz.mu.autotest.extractor.util.TestSuite;
 import uz.mu.autotest.extractor.util.TestSuites;
 import uz.mu.autotest.model.Attempt;
 import uz.mu.autotest.model.TestSuiteEntity;
-import uz.mu.autotest.model.UserTakenLab;
+import uz.mu.autotest.model.StudentTakenLab;
 import uz.mu.autotest.processor.ArtifactProcessor;
 
 import java.util.List;
@@ -33,12 +33,12 @@ public class RetryService {
 
     private final GithubClient gitHubApiService;
     private final AttemptService attemptService;
-    private final UserTakenLabService userTakenLabService;
+    private final StudentTakenLabService studentTakenLabService;
     private final ArtifactProcessor artifactProcessor;
     private final ConversionService conversionService;
 
     @Async
-    public CompletableFuture<Attempt> retryAction(String owner, String repo, String accessToken, UserTakenLab userTakenLab) {
+    public CompletableFuture<Attempt> retryAction(String owner, String repo, String accessToken, StudentTakenLab studentTakenLab) {
         log.info("Started retry action....");
         final int maxAttempts = 5;
         int attempts = 0;
@@ -58,9 +58,10 @@ public class RetryService {
                     log.info("TestSuite: {}", testSuite);
                     Attempt attempt = lastAttempt.get();
                     TestSuiteEntity testSuiteEntity = conversionService.convert(testSuite, TestSuiteEntity.class);
+                    testSuiteEntity.getTestCases().forEach(testCaseEntity -> testCaseEntity.setTestSuite(testSuiteEntity));
                     attempt.setTestSuite(testSuiteEntity);
                     testSuiteEntity.setAttempt(attempt);
-                    attempt.setUserTakenLab(userTakenLab);
+                    attempt.setStudentTakenLab(studentTakenLab);
                     attemptService.addAttempt(attempt);
                     log.info("Successfully added new attempt {}", attempt);
                     return CompletableFuture.completedFuture(attempt);

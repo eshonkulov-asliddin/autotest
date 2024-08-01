@@ -1,4 +1,4 @@
-package uz.mu.autotest.service;
+package uz.mu.autotest.service.impl;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;

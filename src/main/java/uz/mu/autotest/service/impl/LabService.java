@@ -1,16 +1,20 @@
-package uz.mu.autotest.service;
+package uz.mu.autotest.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
+import uz.mu.autotest.dto.LabStatistics;
 import uz.mu.autotest.dto.lab.AddLabRequest;
 import uz.mu.autotest.dto.lab.LabDto;
+import uz.mu.autotest.dto.student.StudentDto;
 import uz.mu.autotest.exception.AccessDeniedException;
 import uz.mu.autotest.model.Course;
 import uz.mu.autotest.model.Lab;
 import uz.mu.autotest.model.LabStatus;
+import uz.mu.autotest.model.StudentTakenLab;
 import uz.mu.autotest.repository.LabRepository;
+import uz.mu.autotest.repository.StudentTakenLabRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,9 +28,10 @@ public class LabService {
     private final TeacherService teacherService;
     private final CourseService courseService;
     private final ConversionService conversionService;
+    private final StudentTakenLabRepository studentTakenLabRepository;
 
     public List<LabDto> getLabsByCourseId(String username, Long courseId) {
-//        verifyAccess(username, courseId);
+        // TODO think about verifyAccess(username, courseId);
         List<Lab> labsByCourseId = labRepository.findLabsByCourseId(courseId);
         log.info("Retrieved labs for course id {}, {}", courseId, labsByCourseId);
         return labsByCourseId.stream()
@@ -51,6 +56,32 @@ public class LabService {
         lab.setCourse(course);
 
         labRepository.save(lab);
+    }
+
+    public LabStatistics getLabStatisticsForGroup(Long labId, Long groupId) {
+        List<StudentTakenLab> studentTakenLabByLabIdAndGroupId = studentTakenLabRepository.findStudentTakenLabByLabIdAndGroupId(labId, groupId);
+
+        List<StudentDto> completedStudents = studentTakenLabByLabIdAndGroupId.stream()
+                .filter(studentTakenLab -> studentTakenLab.getStatus().equals(LabStatus.COMPLETED))
+                .map(StudentTakenLab::getUser)
+                .map(user -> conversionService.convert(user, StudentDto.class))
+                .toList();
+
+        List<StudentDto> pendingStudents = studentTakenLabByLabIdAndGroupId.stream()
+                .filter(studentTakenLab -> studentTakenLab.getStatus().equals(LabStatus.STARTED))
+                .map(StudentTakenLab::getUser)
+                .map(user -> conversionService.convert(user, StudentDto.class))
+                .toList();
+
+        List<StudentDto> notStartedStudents = studentTakenLabByLabIdAndGroupId.stream()
+                .filter(studentTakenLab -> studentTakenLab.getStatus().equals(LabStatus.NOT_STARTED))
+                .map(StudentTakenLab::getUser)
+                .map(user -> conversionService.convert(user, StudentDto.class))
+                .toList();
+        LabStatistics labStatistics = new LabStatistics(labId, groupId, completedStudents, pendingStudents, notStartedStudents);
+        log.info("Statistics for labId {} groupId {}: {}", labId, groupId, labStatistics);
+
+        return labStatistics;
     }
 
     public void verifyAccess(String username, Long courseId) {

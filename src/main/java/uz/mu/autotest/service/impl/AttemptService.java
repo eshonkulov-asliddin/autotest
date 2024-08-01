@@ -1,9 +1,11 @@
-package uz.mu.autotest.service;
+package uz.mu.autotest.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import uz.mu.autotest.dto.AttemptDto;
 import uz.mu.autotest.model.Attempt;
 import uz.mu.autotest.repository.AttemptRepository;
 
@@ -16,11 +18,15 @@ import java.util.Optional;
 public class AttemptService {
 
     private final AttemptRepository attemptRepo;
+    private final ConversionService conversionService;
 
-    public List<Attempt> getAttemptsByUserTakenLabId(Long userTakenLabId) {
-        List<Attempt> byUserIdAndCourseId = attemptRepo.findByUserTakenLabId(userTakenLabId);
+    public List<AttemptDto> getAttemptsByUserTakenLabId(Long userTakenLabId) {
+        List<Attempt> byUserIdAndCourseId = attemptRepo.findByStudentTakenLabId(userTakenLabId);
+        List<AttemptDto> attemptDtoList = byUserIdAndCourseId.stream()
+                .map(attempt -> conversionService.convert(attempt, AttemptDto.class))
+                .toList();
         log.info("Retrieved attempts by userTakenLabId {}", userTakenLabId);
-        return byUserIdAndCourseId;
+        return attemptDtoList;
     }
 
     @Transactional

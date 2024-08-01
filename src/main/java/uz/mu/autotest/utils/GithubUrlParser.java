@@ -1,6 +1,7 @@
 package uz.mu.autotest.utils;
 
 import uz.mu.autotest.exception.GithubUrlParserException;
+import uz.mu.autotest.extractor.Runtime;
 
 public class GithubUrlParser {
 
@@ -29,5 +30,13 @@ public class GithubUrlParser {
 
     public static String generateReadmeUrl(String url) {
         return README_URL_PREFIX + "/" + extractUsername(url) + "/" + extractRepoName(url) + README_URL_POSTFIX;
+    }
+
+    public static Runtime getRuntime(String repoName) {
+        if ("autotest-java-lab".equals(repoName)) {
+            return Runtime.JAVA;
+        }else{
+            return Runtime.PYTHON;
+        }
     }
 }

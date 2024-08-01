@@ -14,12 +14,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import uz.mu.autotest.client.GithubClient;
 import uz.mu.autotest.dto.AttemptDto;
+import uz.mu.autotest.dto.GenerateRepositoryRequest;
 import uz.mu.autotest.dto.SubmitTaskRequest;
-import uz.mu.autotest.dto.UserTakenLabDto;
-import uz.mu.autotest.service.AuthService;
-import uz.mu.autotest.service.LabService;
-import uz.mu.autotest.service.UserService;
-import uz.mu.autotest.service.UserTakenLabService;
+import uz.mu.autotest.dto.StudentTakenLabDto;
+import uz.mu.autotest.service.impl.AuthService;
+import uz.mu.autotest.service.impl.LabService;
+import uz.mu.autotest.service.impl.UserService;
+import uz.mu.autotest.service.impl.StudentTakenLabService;
 import uz.mu.autotest.service.impl.GithubRepositoryService;
 import uz.mu.autotest.service.impl.GithubSubmitTaskService;
 
@@ -33,7 +34,7 @@ public class WebsocketController {
 
     private final LabService labService;
     private final UserService userService;
-    private final UserTakenLabService userTakenLabService;
+    private final StudentTakenLabService studentTakenLabService;
     private final GithubClient githubClient;
     private final AuthService authService;
     private final GithubSubmitTaskService githubSubmitTaskService;
@@ -42,7 +43,7 @@ public class WebsocketController {
     private final SimpMessagingTemplate simpMessagingTemplate;
 
 
-    // TODO implement RabbitMQ interaction for submitTask
+    //TODO implement RabbitMQ interaction for submitTask
 //    @MessageMapping("/submitTask")
 //    public void submitTask(SubmitTaskRequest request, @AuthenticationPrincipal Principal principal, @Payload String username, @Headers Map<String, String> headers, SimpMessageHeaderAccessor headerAccessor) throws InterruptedException {
 //        log.info("headers: {}", headers);
@@ -79,16 +80,13 @@ public class WebsocketController {
 
     @MessageMapping("/generateRepository")
     @SendToUser("/queue/repositories")
-    public UserTakenLabDto generateRepository(SubmitTaskRequest request, @AuthenticationPrincipal Principal principal) {
+    public StudentTakenLabDto generateRepository(GenerateRepositoryRequest request, @AuthenticationPrincipal Principal principal) {
         OAuth2AuthenticationToken oAuth2AuthenticationToken = (OAuth2AuthenticationToken) principal;
         OAuth2User oAuth2User = oAuth2AuthenticationToken.getPrincipal();
         String login = oAuth2User.getAttribute("login").toString();
         OAuth2AuthorizedClient client = clientService.loadAuthorizedClient(oAuth2AuthenticationToken.getAuthorizedClientRegistrationId(), oAuth2AuthenticationToken.getName());
         String accessToken = "Bearer " + client.getAccessToken().getTokenValue();
 
-        log.info("Principal: {}", principal);
-        log.info("auth2User login: {}", login);
-        log.info("access token: {}", accessToken);
         return githubRepositoryService.generateRepository(request, login, accessToken);
     }
 

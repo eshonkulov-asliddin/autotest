@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import uz.mu.autotest.dto.course.CourseDto;
-import uz.mu.autotest.service.CourseService;
+import uz.mu.autotest.service.impl.CourseService;
 
 import java.util.List;
 

@@ -1,91 +1,93 @@
+const STOMP_URL = 'ws://localhost:9091/mu-autotest';
+const SUBMIT_TASK_BUTTON_ID = 'submitTask';
+const START_TASK_BUTTON_ID = 'startTask';
+const SPINNER_DISPLAY_STYLE = 'inline-block';
+const SPINNER_HIDE_STYLE = 'none';
+const TASK_IN_PROGRESS_KEY = 'taskInProgress';
+const LAB_ID_KEY = 'labId';
+const CALL_BUILD_AND_TEST_REPO_KEY = 'callBuildAndTestRepository';
+
 const stompClient = new StompJs.Client({
-    brokerURL: 'ws://localhost:9091/mu-autotest'
+    brokerURL: STOMP_URL
 });
 
-
-function enableLoading(){
-    const submitButton = document.getElementById('submitTask');
-    submitButton.disabled = true;
-    const spinner = document.getElementById("submitTaskSpinner");
-    spinner.style.display = "inline-block";
+function toggleSpinner(buttonId, spinnerId, action) {
+    const button = document.getElementById(buttonId);
+    const spinner = document.getElementById(spinnerId);
+    button.disabled = action === 'show';
+    spinner.style.display = action === 'show' ? SPINNER_DISPLAY_STYLE : SPINNER_HIDE_STYLE;
 }
 
-function disableLoading(){
-    const submitButton = document.getElementById('submitTask');
-    submitButton.disabled = false;
-    const spinner = document.getElementById("submitTaskSpinner");
-    spinner.style.display = "none";
-    sessionStorage.removeItem('taskInProgress');
-    sessionStorage.removeItem('labId');
-    sessionStorage.setItem('callBuildAndTestRepository', 'false');
+function showSpinner(buttonId, spinnerId) {
+    toggleSpinner(buttonId, spinnerId, 'show');
+}
+
+function hideSpinner(buttonId, spinnerId) {
+    toggleSpinner(buttonId, spinnerId, 'hide');
 }
 
 function reconnectIfNecessary() {
-    if (sessionStorage.getItem('taskInProgress') === 'true') {
-        enableLoading();
+    if (sessionStorage.getItem(TASK_IN_PROGRESS_KEY) === 'true') {
+        showSpinner(SUBMIT_TASK_BUTTON_ID, `${SUBMIT_TASK_BUTTON_ID}Spinner`);
         stompClient.activate();
-        // submit task websocket connection
         stompClient.onConnect = (frame) => {
             console.log('Connected: ' + frame);
             stompClient.subscribe('/user/queue/attempts', (response) => {
                 console.log(JSON.parse(response.body));
-                addAccordionItem(JSON.parse(response.body))
+                addAccordionItem(JSON.parse(response.body));
                 disconnect();
-                disableLoading();
+                hideSpinner(SUBMIT_TASK_BUTTON_ID, `${SUBMIT_TASK_BUTTON_ID}Spinner`);
             });
         };
     }
 }
 
 window.addEventListener('load', reconnectIfNecessary);
-function submitTask(callback) {
-    const labId = parseInt($("#submitTask").data("lab-id"));
-    console.log("lab id", labId)
-    enableLoading();
-    sessionStorage.setItem('taskInProgress', 'true');
-    sessionStorage.setItem('labId', labId);
+
+function submitTask() {
+    const labId = parseInt($(`#${SUBMIT_TASK_BUTTON_ID}`).data("lab-id"));
+    console.log("lab id", labId);
+    showSpinner(SUBMIT_TASK_BUTTON_ID, `${SUBMIT_TASK_BUTTON_ID}Spinner`);
+    sessionStorage.setItem(TASK_IN_PROGRESS_KEY, 'true');
+    sessionStorage.setItem(LAB_ID_KEY, labId);
 
     stompClient.activate();
-    // submit task websocket connection
     stompClient.onConnect = (frame) => {
         console.log('Connected: ' + frame);
         stompClient.subscribe('/user/queue/attempts', (response) => {
             console.log(JSON.parse(response.body));
-            addAccordionItem(JSON.parse(response.body))
+            addAccordionItem(JSON.parse(response.body));
             disconnect();
-            disableLoading();
+            sessionStorage.clear();
+            hideSpinner(SUBMIT_TASK_BUTTON_ID, `${SUBMIT_TASK_BUTTON_ID}Spinner`);
         });
         buildAndTestRepository();
     };
 
     stompClient.onWebSocketError = (error) => {
         console.error('Error with websocket', error);
-        disableLoading();
-
+        hideSpinner(SUBMIT_TASK_BUTTON_ID, `${SUBMIT_TASK_BUTTON_ID}Spinner`);
     };
 
     stompClient.onStompError = (frame) => {
         console.error('Broker reported error: ' + frame.headers['message']);
         console.error('Additional details: ' + frame.body);
-        disableLoading();
+        hideSpinner(SUBMIT_TASK_BUTTON_ID, `${SUBMIT_TASK_BUTTON_ID}Spinner`);
     };
 }
 
-function startTask(callback) {
+function startTask() {
+    showSpinner(START_TASK_BUTTON_ID, `${START_TASK_BUTTON_ID}Spinner`);
     stompClient.activate();
-    // generate repository websocket connection
     stompClient.onConnect = (frame) => {
         console.log('Connected: ' + frame);
         stompClient.subscribe('/user/queue/repositories', (response) => {
-            var userTakenLab = JSON.parse(response.body);
-            console.log(userTakenLab);
-            const id = userTakenLab.id;
-            const githubUrl = userTakenLab.githubUrl;
-            const status = userTakenLab.status;
-            const courseId = userTakenLab.courseId;
-            const labId = userTakenLab.labId;
+            const userTakenLab = JSON.parse(response.body);
+            const { id, githubUrl } = userTakenLab;
             console.log("Started Lab: ", userTakenLab);
-            addRepositoryCard(githubUrl, labId);
+
+            hideSpinner(START_TASK_BUTTON_ID, `${START_TASK_BUTTON_ID}Spinner`);
+            addRepositoryCard(githubUrl, id);
             disconnect();
         });
         generateRepository();
@@ -99,7 +101,6 @@ function startTask(callback) {
         console.error('Broker reported error: ' + frame.headers['message']);
         console.error('Additional details: ' + frame.body);
     };
-
 }
 
 function disconnect() {
@@ -109,154 +110,242 @@ function disconnect() {
 
 function buildAndTestRepository() {
     if (stompClient.connected) {
-        let labId = parseInt($("#submitTask").data("lab-id"));
+        const labId = parseInt($(`#${SUBMIT_TASK_BUTTON_ID}`).data("lab-id"));
         console.log(labId);
         stompClient.publish({
             destination: "/app/submitTask",
-            body: JSON.stringify({'labId': labId})
+            body: JSON.stringify({ 'labId': labId })
         });
     } else {
-        // Handle case where WebSocket connection is not yet established
         console.error('WebSocket connection not established');
     }
 }
 
 function generateRepository() {
     if (stompClient.connected) {
-        let labId = parseInt($("#startTask").data("not-started-lab-id"));
+        const labId = parseInt($(`#${START_TASK_BUTTON_ID}`).data("not-started-lab-id"));
         console.log(labId);
         stompClient.publish({
             destination: "/app/generateRepository",
-            body: JSON.stringify({'labId': labId})
+            body: JSON.stringify({ 'labId': labId })
         });
     } else {
-        // Handle case where WebSocket connection is not yet established
         console.error('WebSocket connection not established');
     }
 }
 
-const buildRepositoryCard = function(githubUrl) {
-    console.log("Constructing repository card ...");
-    let cardDiv = document.createElement("div");
+function buildRepositoryCard(githubUrl) {
+    const cardDiv = document.createElement("div");
     cardDiv.classList.add("card");
 
-    let cardBodyDiv = document.createElement("div");
+    const cardBodyDiv = document.createElement("div");
     cardBodyDiv.classList.add("card-body");
 
-    let cardTitle = document.createElement("h5");
+    const cardTitle = document.createElement("h5");
     cardTitle.classList.add("card-title");
     cardTitle.textContent = "GitHub Repository";
 
-    let cardText = document.createElement("p");
+    const cardText = document.createElement("p");
     cardText.classList.add("card-text");
     cardText.textContent = "Check out task on GitHub:";
 
-    let cardLink = document.createElement("a");
+    const cardLink = document.createElement("a");
     cardLink.setAttribute("href", githubUrl);
     cardLink.setAttribute("target", "_blank");
     cardLink.classList.add("btn", "btn-primary");
     cardLink.textContent = "GitHub Repository";
 
-    // Appending elements
-    cardBodyDiv.appendChild(cardTitle);
-    cardBodyDiv.appendChild(cardText);
-    cardBodyDiv.appendChild(cardLink);
-
+    cardBodyDiv.append(cardTitle, cardText, cardLink);
     cardDiv.appendChild(cardBodyDiv);
 
     return cardDiv;
-
 }
 
 function createSubmitTaskButton(labId) {
-    let button = document.createElement('button');
-    button.id = 'submitTask';
+    const button = document.createElement('button');
+    button.id = SUBMIT_TASK_BUTTON_ID;
     button.className = 'btn btn-dark btn-block';
     button.dataset.labId = labId;
 
-    // Create the icon
-    let icon = document.createElement('i');
+    const icon = document.createElement('i');
     icon.className = 'fab fa-github mr-1';
 
-    // Append the icon and text to the button
-    button.appendChild(icon);
-    button.appendChild(document.createTextNode(' Submit'));
+    const spinner = document.createElement('span');
+    spinner.id = `${SUBMIT_TASK_BUTTON_ID}Spinner`;
+    spinner.className = 'spinner-border spinner-border-sm';
+    spinner.role = 'status';
+    spinner.ariaHidden = 'true';
+    spinner.style.display = 'none';
 
-    // Create the div
-    let div = document.createElement('div');
+    button.append(icon, document.createTextNode(' Submit '), spinner);
+
+    const div = document.createElement('div');
     div.className = 'col-md-2';
-
-    // Append the button to the div
     div.appendChild(button);
 
-    return div;
+    return { button, div };
 }
 
-const buildAccordionItem = function (id, result, title, descriptionUrl) {
-    let color;
-    if (result === 'SUCCESS') {
-        color = "bg-success text-white";
-    } else {
-        color = "bg-danger text-white";
-    }
-    let item = document.createElement('div');
+// function buildAccordionItem(id, result, title, descriptionUrl) {
+//     const color = result === 'SUCCESS' ? "bg-success text-white" : "bg-danger text-white";
+//     const item = document.createElement('div');
+//     item.className = 'accordion-item';
+//
+//     const header = document.createElement('h2');
+//     header.className = 'accordion-header';
+//     header.id = `heading_${id}`;
+//
+//     const button = document.createElement('button');
+//     button.className = `accordion-button collapsed ${color}`;
+//     button.setAttribute('type', 'button');
+//     button.setAttribute('data-bs-toggle', 'collapse');
+//     button.setAttribute('data-bs-target', `#accordion_${id}`);
+//     button.setAttribute('aria-expanded', 'false');
+//     button.setAttribute('aria-controls', `flush-collapseOne_${id}`);
+//     button.textContent = title;
+//     header.appendChild(button);
+//     const collapse = document.createElement('div');
+//     collapse.id = `accordion_${id}`;
+//     collapse.className = 'accordion-collapse collapse';
+//
+//     const body = document.createElement('div');
+//     body.className = `accordion-body ${color}`;
+//     body.textContent = "You can see details ";
+//     body.style.whiteSpace = 'normal';
+//
+//     const link = document.createElement("a");
+//     link.href = descriptionUrl;
+//     link.textContent = "here";
+//     link.setAttribute("target", "_blank");
+//     body.appendChild(link);
+//
+//     collapse.appendChild(body);
+//     item.appendChild(header);
+//     item.appendChild(collapse);
+//
+//     return item;
+// }
+
+function buildAccordionItem(attempt) {
+    const color = attempt.result === 'SUCCESS' ? "bg-success text-white" : "bg-danger text-white";
+    const item = document.createElement('div');
     item.className = 'accordion-item';
 
-    let header = document.createElement('h2');
+    const header = document.createElement('h2');
     header.className = 'accordion-header';
-    header.id = 'heading_' + id;
+    header.id = `heading_${attempt.id}`;
 
-    let button = document.createElement('button');
+    const button = document.createElement('button');
     button.className = `accordion-button collapsed ${color}`;
     button.setAttribute('type', 'button');
     button.setAttribute('data-bs-toggle', 'collapse');
-    button.setAttribute('data-bs-target', '#accordion_' + `${id}`);
+    button.setAttribute('data-bs-target', `#accordion_${attempt.id}`);
     button.setAttribute('aria-expanded', 'false');
-    button.setAttribute('aria-controls', 'flush-collapseOne_' + id);
-    button.textContent = title;
-
+    button.setAttribute('aria-controls', `accordion_${attempt.id}`);
+    button.textContent = `Verification ${attempt.runNumber}`;
     header.appendChild(button);
 
-    let collapse = document.createElement('div');
-    collapse.id = "accordion_" + id;
+    const collapse = document.createElement('div');
+    collapse.id = `accordion_${attempt.id}`;
     collapse.className = 'accordion-collapse collapse';
+    collapse.setAttribute('aria-labelledby', `heading_${attempt.id}`);
+    collapse.setAttribute('data-bs-parent', '#accordionFlushExample');
 
-    let body = document.createElement('div');
-    body.className = 'accordion-body ' + color;
-    body.textContent = "You can see details "
-    body.style.whiteSpace = 'normal';
+    const body = document.createElement('div');
+    body.className = 'accordion-body';
+    body.innerHTML = `You can see details <a href="${attempt.detailsUrl}" target="_blank">here</a>`;
 
-    // Append the content generated by generateInnerAccordion
-    const a = document.createElement("a")
-    a.href = descriptionUrl;
-    a.textContent = "here";
-    a.setAttribute("target", "_blank");
-    body.appendChild(a);
+    if (attempt.testSuiteDto && attempt.testSuiteDto.testCases && attempt.testSuiteDto.testCases.length > 0) {
+        const nestedAccordion = document.createElement('div');
+        nestedAccordion.className = 'accordion accordion-flush';
+        nestedAccordion.id = `nestedAccordion_${attempt.id}`;
+
+        attempt.testSuiteDto.testCases.forEach(testCase => {
+            const nestedItem = buildNestedAccordionItem(testCase, attempt.id);
+            nestedAccordion.appendChild(nestedItem);
+        });
+
+        body.appendChild(nestedAccordion);
+    }
 
     collapse.appendChild(body);
-
     item.appendChild(header);
     item.appendChild(collapse);
 
     return item;
 }
 
+function buildNestedAccordionItem(testCase, parentAttemptId) {
+    const color = testCase.failure ? "bg-danger text-white" : "bg-success text-white";
+    const item = document.createElement('div');
+    item.className = 'accordion-item';
+
+    const header = document.createElement('h2');
+    header.className = 'accordion-header';
+    header.id = `case_heading_${parentAttemptId}_${testCase.id}`;
+
+    const button = document.createElement('button');
+    button.className = `accordion-button collapsed ${color}`;
+    button.setAttribute('type', 'button');
+    button.setAttribute('data-bs-toggle', 'collapse');
+    button.setAttribute('data-bs-target', `#case_accordion_${parentAttemptId}_${testCase.id}`);
+    button.setAttribute('aria-expanded', 'false');
+    button.setAttribute('aria-controls', `case_accordion_${parentAttemptId}_${testCase.id}`);
+    button.textContent = `Test Case: ${testCase.name}`;
+    header.appendChild(button);
+
+    const collapse = document.createElement('div');
+    collapse.id = `case_accordion_${parentAttemptId}_${testCase.id}`;
+    collapse.className = 'accordion-collapse collapse';
+    collapse.setAttribute('aria-labelledby', `case_heading_${parentAttemptId}_${testCase.id}`);
+    collapse.setAttribute('data-bs-parent', `#nestedAccordion_${parentAttemptId}`);
+
+    const body = document.createElement('div');
+    body.className = 'accordion-body';
+    body.innerHTML = `
+        <p>Classname: ${testCase.classname}</p>
+        <p>Time: ${testCase.time}s</p>
+    `;
+
+    if (testCase.failure) {
+        const failureDetails = document.createElement('div');
+        failureDetails.innerHTML = `
+            <p>Failure Message: ${testCase.failure.message}</p>
+            <pre>${testCase.failure.content}</pre>
+        `;
+        body.appendChild(failureDetails);
+    } else {
+        body.innerHTML += `<p>Test passed successfully.</p>`;
+    }
+
+    collapse.appendChild(body);
+    item.appendChild(header);
+    item.appendChild(collapse);
+
+    return item;
+}
+
+
+// function addAccordionItem(attempt) {
+//     $("#accordionFlushExample").append(buildAccordionItem(attempt.id, attempt.result, `Verification ${attempt.runNumber}`, attempt.detailsUrl));
+// }
+
 function addAccordionItem(attempt) {
-    $("#accordionFlushExample").append(buildAccordionItem(attempt.id, attempt.result, "Verification " + attempt.runNumber, attempt.detailsUrl));
+    $("#accordionFlushExample").append(buildAccordionItem(attempt));
 }
 
 function addRepositoryCard(githubUrl, labId) {
     $("#repositoryCard").append(buildRepositoryCard(githubUrl));
-    $("#startTask").hide();
-    $("#submitTaskDiv").append(createSubmitTaskButton(labId));
+    $(`#${START_TASK_BUTTON_ID}`).hide();
+
+    const { button, div } = createSubmitTaskButton(labId);
+    $("#submitTaskDiv").append(div);
+    $(button).click(() => submitTask());
 }
 
 $(function () {
     $("form").on('submit', (e) => e.preventDefault());
-    $( "#submitTask" ).click(() => submitTask());
-    $( "#startTask" ).click(() => startTask());
-    $( "#disconnect" ).click(() => disconnect());
-});
-$(document).on('click', '#submitTask', function() {
-    submitTask();
+    $(`#${SUBMIT_TASK_BUTTON_ID}`).click(() => submitTask());
+    $(`#${START_TASK_BUTTON_ID}`).click(() => startTask());
+    $("#disconnect").click(() => disconnect());
 });

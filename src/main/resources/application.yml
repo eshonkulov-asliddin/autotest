@@ -46,6 +46,7 @@ app:
     coursesUnassignGroupForm: /course/unassign-groups-form.html
   teacher:
     dashboardHtmlPage: /teacher/dashboard.html
+    labManagementHtmlPage: /teacher/lab-management.html
 
 
 testResults:

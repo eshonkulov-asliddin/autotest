@@ -15,5 +15,4 @@ public interface GroupRepository extends JpaRepository<Group, Long> {
 
     @Query("SELECT g FROM Group g WHERE g.id IN (SELECT g.id FROM Course c JOIN c.groups g WHERE c.id = :courseId)")
     List<Group> findGroupsAssignedToCourseId(Long courseId);
-
 }

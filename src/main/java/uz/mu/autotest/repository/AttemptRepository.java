@@ -10,5 +10,5 @@ public interface AttemptRepository extends JpaRepository<Attempt, Long> {
 
     Optional<Attempt> findById(Long id);
 
-    List<Attempt> findByUserTakenLabId(Long userTakenLabId);
+    List<Attempt> findByStudentTakenLabId(Long studentTakenLabId);
 }

@@ -1,8 +1,8 @@
 package uz.mu.autotest.service;
 
-import uz.mu.autotest.dto.SubmitTaskRequest;
-import uz.mu.autotest.dto.UserTakenLabDto;
+import uz.mu.autotest.dto.GenerateRepositoryRequest;
+import uz.mu.autotest.dto.StudentTakenLabDto;
 
 public interface RepositoryService {
-    UserTakenLabDto generateRepository(SubmitTaskRequest request, String labOwner, String accessToken);
+    StudentTakenLabDto generateRepository(GenerateRepositoryRequest request, String labOwner, String accessToken);
 }

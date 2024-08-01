@@ -25,7 +25,7 @@ public class GithubClient {
     private final ObjectMapper objectMapper;
 
     @Value("${github.api.url}")
-    private final String githubApiUrl = "https://api.github.com";
+    private String githubApiUrl;
 
     public ResponseEntity<String> triggerWorkflow(String owner, String repo, String accessToken) {
 
@@ -34,7 +34,7 @@ public class GithubClient {
 
         HttpEntity<String> entity = new HttpEntity<>(body, headers);
 
-        String triggerWorkflowUrl = githubApiUrl + "/repos/" + owner + "/" + repo + "/actions/workflows/python-app.yml/dispatches";
+        String triggerWorkflowUrl = githubApiUrl + "/repos/" + owner + "/" + repo + "/actions/workflows/workflow.yml/dispatches";
         return restTemplate.exchange(triggerWorkflowUrl, HttpMethod.POST, entity, String.class);
     }
 

@@ -42,10 +42,11 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
                 student.setLogin(loginName);
                 updated = true;
             }
-            if (student.getLoginName() == null || student.getLoginName().isEmpty()) {
-                student.setLoginName(oAuth2Name);
-                updated = true;
-            }
+// TODO think about validation
+//            if (student.getLoginName() == null || student.getLoginName().isEmpty()) {
+//                student.setLoginName(oAuth2Name);
+//                updated = true;
+//            }
             if (updated) {
                 studentRepository.save(student);
                 log.info("Updated student with OAuth2 login: {}", loginName);

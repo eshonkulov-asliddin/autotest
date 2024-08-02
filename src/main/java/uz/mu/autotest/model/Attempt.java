@@ -27,7 +27,7 @@ public class Attempt {
     private StudentTakenLab studentTakenLab;
 
     @OneToOne(mappedBy = "attempt", cascade = CascadeType.ALL, orphanRemoval = true)
-    private TestSuiteEntity testSuite;
+    private TestResults testResults;
 
     @Override
     public String toString() {

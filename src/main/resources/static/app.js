@@ -186,46 +186,6 @@ function createSubmitTaskButton(labId) {
     return { button, div };
 }
 
-// function buildAccordionItem(id, result, title, descriptionUrl) {
-//     const color = result === 'SUCCESS' ? "bg-success text-white" : "bg-danger text-white";
-//     const item = document.createElement('div');
-//     item.className = 'accordion-item';
-//
-//     const header = document.createElement('h2');
-//     header.className = 'accordion-header';
-//     header.id = `heading_${id}`;
-//
-//     const button = document.createElement('button');
-//     button.className = `accordion-button collapsed ${color}`;
-//     button.setAttribute('type', 'button');
-//     button.setAttribute('data-bs-toggle', 'collapse');
-//     button.setAttribute('data-bs-target', `#accordion_${id}`);
-//     button.setAttribute('aria-expanded', 'false');
-//     button.setAttribute('aria-controls', `flush-collapseOne_${id}`);
-//     button.textContent = title;
-//     header.appendChild(button);
-//     const collapse = document.createElement('div');
-//     collapse.id = `accordion_${id}`;
-//     collapse.className = 'accordion-collapse collapse';
-//
-//     const body = document.createElement('div');
-//     body.className = `accordion-body ${color}`;
-//     body.textContent = "You can see details ";
-//     body.style.whiteSpace = 'normal';
-//
-//     const link = document.createElement("a");
-//     link.href = descriptionUrl;
-//     link.textContent = "here";
-//     link.setAttribute("target", "_blank");
-//     body.appendChild(link);
-//
-//     collapse.appendChild(body);
-//     item.appendChild(header);
-//     item.appendChild(collapse);
-//
-//     return item;
-// }
-
 function buildAccordionItem(attempt) {
     const color = attempt.result === 'SUCCESS' ? "bg-success text-white" : "bg-danger text-white";
     const item = document.createElement('div');
@@ -255,12 +215,12 @@ function buildAccordionItem(attempt) {
     body.className = 'accordion-body';
     body.innerHTML = `You can see details <a href="${attempt.detailsUrl}" target="_blank">here</a>`;
 
-    if (attempt.testSuiteDto && attempt.testSuiteDto.testCases && attempt.testSuiteDto.testCases.length > 0) {
+    if (attempt.testResultDto && attempt.testResultDto.testCases && attempt.testResultDto.testCases.length > 0) {
         const nestedAccordion = document.createElement('div');
         nestedAccordion.className = 'accordion accordion-flush';
         nestedAccordion.id = `nestedAccordion_${attempt.id}`;
 
-        attempt.testSuiteDto.testCases.forEach(testCase => {
+        attempt.testResultDto.testCases.forEach(testCase => {
             const nestedItem = buildNestedAccordionItem(testCase, attempt.id);
             nestedAccordion.appendChild(nestedItem);
         });
@@ -310,8 +270,8 @@ function buildNestedAccordionItem(testCase, parentAttemptId) {
     if (testCase.failure) {
         const failureDetails = document.createElement('div');
         failureDetails.innerHTML = `
-            <p>Failure Message: ${testCase.failure.message}</p>
-            <pre>${testCase.failure.content}</pre>
+            <p>Failure Message: ${testCase.failure.type}</p>
+            <pre>${testCase.failure.details}</pre>
         `;
         body.appendChild(failureDetails);
     } else {

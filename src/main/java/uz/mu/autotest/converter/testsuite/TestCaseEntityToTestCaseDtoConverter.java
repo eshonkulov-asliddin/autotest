@@ -16,7 +16,7 @@ public class TestCaseEntityToTestCaseDtoConverter implements Converter<TestCaseE
 
     @Override
     public TestCaseDto convert(TestCaseEntity source) {
-        FailureEntity failure = source.getFailure();
+        FailureEntity failure = source.getFailureEntity();
         FailureDto failureDto = null;
         if (failure != null) {
              failureDto = failureEntityToFailureDtoConverter.convert(failure);

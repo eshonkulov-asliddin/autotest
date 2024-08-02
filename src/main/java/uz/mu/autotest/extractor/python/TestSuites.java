@@ -1,4 +1,4 @@
-package uz.mu.autotest.extractor.util;
+package uz.mu.autotest.extractor.python;
 
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;

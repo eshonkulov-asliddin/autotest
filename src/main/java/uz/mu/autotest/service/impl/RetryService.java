@@ -8,14 +8,16 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import uz.mu.autotest.client.GithubClient;
 import uz.mu.autotest.exception.GetLastActionRunException;
-import uz.mu.autotest.extractor.util.TestSuite;
-import uz.mu.autotest.extractor.util.TestSuites;
+import uz.mu.autotest.extractor.Runtime;
 import uz.mu.autotest.model.Attempt;
-import uz.mu.autotest.model.TestSuiteEntity;
+import uz.mu.autotest.model.JavaTestResults;
+import uz.mu.autotest.model.PythonTestResults;
+import uz.mu.autotest.model.TestResults;
 import uz.mu.autotest.model.StudentTakenLab;
-import uz.mu.autotest.processor.ArtifactProcessor;
+import uz.mu.autotest.processor.JavaArtifactProcessor;
+import uz.mu.autotest.processor.PythonArtifactProcessor;
+import uz.mu.autotest.utils.GithubUrlParser;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -34,8 +36,9 @@ public class RetryService {
     private final GithubClient gitHubApiService;
     private final AttemptService attemptService;
     private final StudentTakenLabService studentTakenLabService;
-    private final ArtifactProcessor artifactProcessor;
     private final ConversionService conversionService;
+    private final JavaArtifactProcessor javaArtifactProcessor;
+    private final PythonArtifactProcessor pythonArtifactProcessor;
 
     @Async
     public CompletableFuture<Attempt> retryAction(String owner, String repo, String accessToken, StudentTakenLab studentTakenLab) {
@@ -50,21 +53,39 @@ public class RetryService {
 
                 Optional<Attempt> lastAttempt = gitHubApiService.getLastActionRun(owner, repo, accessToken);
                 Optional<String> downloadUrl = gitHubApiService.getLastActionRunDownloadArtifactUrl(owner, repo, accessToken);
+                Runtime runtime = GithubUrlParser.getRuntime(repo);
+
                 if (lastAttempt.isPresent() && downloadUrl.isPresent()) {
                     // artifact processor
-                    TestSuites testSuites = artifactProcessor.processArtifact(downloadUrl.get(), accessToken, destinationFolder, zipFileName, xmlFileName);
-                    List<TestSuite> testsuite = testSuites.getTestsuite();
-                    TestSuite testSuite = testsuite.get(0);
-                    log.info("TestSuite: {}", testSuite);
-                    Attempt attempt = lastAttempt.get();
-                    TestSuiteEntity testSuiteEntity = conversionService.convert(testSuite, TestSuiteEntity.class);
-                    testSuiteEntity.getTestCases().forEach(testCaseEntity -> testCaseEntity.setTestSuite(testSuiteEntity));
-                    attempt.setTestSuite(testSuiteEntity);
-                    testSuiteEntity.setAttempt(attempt);
-                    attempt.setStudentTakenLab(studentTakenLab);
-                    attemptService.addAttempt(attempt);
-                    log.info("Successfully added new attempt {}", attempt);
-                    return CompletableFuture.completedFuture(attempt);
+                    if (Runtime.JAVA == runtime) {
+                        var testSuite = javaArtifactProcessor.processArtifact(downloadUrl.get(), accessToken, destinationFolder, zipFileName, xmlFileName);
+                        log.info("TestSuite: {}", testSuite);
+                        Attempt attempt = lastAttempt.get();
+                        TestResults javaTestResults = conversionService.convert(testSuite, JavaTestResults.class);
+                        javaTestResults.getTestCaseEntities().forEach(testCaseEntity -> testCaseEntity.setTestResults(javaTestResults));
+                        attempt.setTestResults(javaTestResults);
+                        javaTestResults.setAttempt(attempt);
+                        attempt.setStudentTakenLab(studentTakenLab);
+                        attemptService.addAttempt(attempt);
+                        log.info("Successfully added new attempt {}", attempt);
+                        return CompletableFuture.completedFuture(attempt);
+                    }else if (Runtime.PYTHON == runtime) {
+                        var testSuite = pythonArtifactProcessor.processArtifact(downloadUrl.get(), accessToken, destinationFolder, zipFileName, xmlFileName);
+                        log.info("TestSuite: {}", testSuite);
+                        Attempt attempt = lastAttempt.get();
+                        TestResults pythonTestResults = conversionService.convert(testSuite, PythonTestResults.class);
+                        pythonTestResults.getTestCaseEntities().forEach(testCaseEntity -> testCaseEntity.setTestResults(pythonTestResults));
+                        attempt.setTestResults(pythonTestResults);
+                        pythonTestResults.setAttempt(attempt);
+                        attempt.setStudentTakenLab(studentTakenLab);
+                        attemptService.addAttempt(attempt);
+                        log.info("Successfully added new attempt {}", attempt);
+                        return CompletableFuture.completedFuture(attempt);
+                    }else {
+                        throw new UnsupportedOperationException(String.format("Runtime %s is not supported", runtime));
+                    }
+
+
                 }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();

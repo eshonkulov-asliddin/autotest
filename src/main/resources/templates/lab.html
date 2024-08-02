@@ -96,8 +96,8 @@ http://www.thymeleaf.org ">
                  th:attr="aria-labelledby='heading_' + ${attempt.id}, data-bs-parent='#accordionFlushExample'">
                 <div class="accordion-body">
                     <p>You can see details <a th:href="@{${attempt.detailsUrl}}" target="_blank">here</a></p>
-                    <div class="accordion accordion-flush" th:if="${attempt.testSuiteDto.testCases.size() > 0}" th:id="'nestedAccordion_' + ${attempt.id}">
-                        <div class="accordion-item" th:each="testCase : ${attempt.testSuiteDto.testCases}">
+                    <div class="accordion accordion-flush" th:if="${attempt.testResultDto.testCases.size() > 0}" th:id="'nestedAccordion_' + ${attempt.id}">
+                        <div class="accordion-item" th:each="testCase : ${attempt.testResultDto.testCases}">
                             <h2 class="accordion-header" th:id="'case_heading_' + ${attempt.id} + '_' + ${testCase.id}">
                                 <button class="accordion-button collapsed"
                                         th:classappend="${testCase.failure != null ? 'bg-danger text-white' : 'bg-success text-white'}"
@@ -114,8 +114,8 @@ http://www.thymeleaf.org ">
                                     <p>Classname: <span th:text="${testCase.classname}"></span></p>
                                     <p>Time: <span th:text="${testCase.time}"></span>s</p>
                                     <div th:if="${testCase.failure != null}">
-                                        <p>Failure Message: <span th:text="${testCase.failure.message}"></span></p>
-                                        <p>Failure Content: <pre th:text="${testCase.failure.content}"></pre></p>
+                                        <p>Failure Message: <span th:text="${testCase.failure.type}"></span></p>
+                                        <p>Failure Content: <pre th:text="${testCase.failure.details}"></pre></p>
                                     </div>
                                     <div th:if="${testCase.failure == null}">
                                         <p>Test passed successfully.</p>

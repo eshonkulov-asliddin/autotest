@@ -1,6 +1,6 @@
 package uz.mu.autotest.dto;
 
-import uz.mu.autotest.dto.testsuite.TestSuiteDto;
+import uz.mu.autotest.dto.testsuite.TestResultDto;
 
 public record AttemptDto (
         Long id,
@@ -8,5 +8,5 @@ public record AttemptDto (
         String detailsUrl,
         String result,
         Long userTakenLabId,
-        TestSuiteDto testSuiteDto) {
+        TestResultDto testResultDto) {
 }

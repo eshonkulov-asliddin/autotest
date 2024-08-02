@@ -1,7 +1,7 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: ${MYSQL_HOST_URL}/autotest_new_db
+    url: ${MYSQL_HOST_URL}
     username: ${MYSQL_USERNAME}
     password: ${MYSQL_PASSWORD}
   jpa:
@@ -19,9 +19,9 @@ spring:
       client:
         registration:
           github:
-            client-id: CLIENT_ID
-            client-secret: CLIENT_SECRET
-            scope: repo,workflow
+            client-id:  ${CLIENT_ID}
+            client-secret: ${CLIENT_SECRET}
+            scope: ${SCOPE}
 logging:
   level:
     org.springframework.security: DEBUG

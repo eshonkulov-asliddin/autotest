@@ -17,7 +17,6 @@ import java.util.Set;
 public class Student extends User {
 
     private String login;
-    private String loginName;
 
     @ManyToMany(mappedBy = "students", cascade= {CascadeType.PERSIST, CascadeType.MERGE})
     private Set<Group> groups = new HashSet<>();

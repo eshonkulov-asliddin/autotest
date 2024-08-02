@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -36,6 +37,7 @@ public class SecurityConfig {
                        auth
                                .requestMatchers("/login", "/app.js", "/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
                                .requestMatchers("/mu-autotest").permitAll()
+                               .requestMatchers(HttpMethod.POST, "/workflow/results").permitAll()
                                .anyRequest().authenticated()
                     )
                 .formLogin(formLogin ->

@@ -186,46 +186,6 @@ function createSubmitTaskButton(labId) {
     return { button, div };
 }
 
-// function buildAccordionItem(id, result, title, descriptionUrl) {
-//     const color = result === 'SUCCESS' ? "bg-success text-white" : "bg-danger text-white";
-//     const item = document.createElement('div');
-//     item.className = 'accordion-item';
-//
-//     const header = document.createElement('h2');
-//     header.className = 'accordion-header';
-//     header.id = `heading_${id}`;
-//
-//     const button = document.createElement('button');
-//     button.className = `accordion-button collapsed ${color}`;
-//     button.setAttribute('type', 'button');
-//     button.setAttribute('data-bs-toggle', 'collapse');
-//     button.setAttribute('data-bs-target', `#accordion_${id}`);
-//     button.setAttribute('aria-expanded', 'false');
-//     button.setAttribute('aria-controls', `flush-collapseOne_${id}`);
-//     button.textContent = title;
-//     header.appendChild(button);
-//     const collapse = document.createElement('div');
-//     collapse.id = `accordion_${id}`;
-//     collapse.className = 'accordion-collapse collapse';
-//
-//     const body = document.createElement('div');
-//     body.className = `accordion-body ${color}`;
-//     body.textContent = "You can see details ";
-//     body.style.whiteSpace = 'normal';
-//
-//     const link = document.createElement("a");
-//     link.href = descriptionUrl;
-//     link.textContent = "here";
-//     link.setAttribute("target", "_blank");
-//     body.appendChild(link);
-//
-//     collapse.appendChild(body);
-//     item.appendChild(header);
-//     item.appendChild(collapse);
-//
-//     return item;
-// }
-
 function buildAccordionItem(attempt) {
     const color = attempt.result === 'SUCCESS' ? "bg-success text-white" : "bg-danger text-white";
     const item = document.createElement('div');

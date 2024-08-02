@@ -18,7 +18,7 @@ import java.util.List;
 public class TestSuites {
 
     @XmlElement(name = "testsuite")
-    private List<TestSuite> testsuite;
+    private List<PythonTestSuite> testsuite;
 
 }
 

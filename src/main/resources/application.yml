@@ -53,3 +53,6 @@ testResults:
   destinationFolder: report
   zipFileName: artifact.zip
   xmlFileName: test-results.xml
+
+queue:
+  attempts: queue/attempts

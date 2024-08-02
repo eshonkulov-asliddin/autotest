@@ -3,7 +3,7 @@ package uz.mu.autotest.converter.java;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
-import uz.mu.autotest.extractor.java.TestSuite;
+import uz.mu.autotest.extractor.java.JavaTestSuite;
 import uz.mu.autotest.model.JavaTestResults;
 import uz.mu.autotest.model.TestCaseEntity;
 
@@ -11,12 +11,12 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-public class JavaTestSuiteToJavaTestResultsConverter implements Converter<TestSuite, JavaTestResults> {
+public class JavaTestSuiteToJavaTestResultsConverter implements Converter<JavaTestSuite, JavaTestResults> {
 
     private final JavaTestCaseToTestCaseEntityConverter javaTestCaseToTestCaseEntityConverter;
 
     @Override
-    public JavaTestResults convert(TestSuite source) {
+    public JavaTestResults convert(JavaTestSuite source) {
         JavaTestResults javaTestResults = new JavaTestResults();
         javaTestResults.setName(source.getName());
         javaTestResults.setErrors(source.getErrors());
@@ -26,7 +26,7 @@ public class JavaTestSuiteToJavaTestResultsConverter implements Converter<TestSu
         javaTestResults.setTime(Double.parseDouble(source.getTime()));
 
         List<TestCaseEntity> testCaseEntities = source.getTestCases().stream()
-                .map(testCase -> javaTestCaseToTestCaseEntityConverter.convert(testCase))
+                .map(javaTestCaseToTestCaseEntityConverter::convert)
                 .toList();
 
         javaTestResults.setTestCaseEntities(testCaseEntities);

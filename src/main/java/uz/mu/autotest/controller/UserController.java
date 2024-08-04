@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import uz.mu.autotest.dto.course.CourseDto;
 import uz.mu.autotest.service.impl.CourseService;
 
+import java.security.Principal;
 import java.util.List;
 
 @Controller
@@ -43,25 +45,20 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public String login(@RequestParam("username") String username,
-                        @RequestParam("password") String password) {
+    public String login(@RequestParam("username") String username, @RequestParam("password") String password) {
         log.info("Username: {}", username);
         log.info("Password: {}", password);
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(username, password)
-        );
+        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
         SecurityContextHolder.getContext().setAuthentication(authentication);
-
-
         return "Successfully logged in!";
     }
 
-
+    @PreAuthorize("hasRole('STUDENT') or hasAuthority('OAUTH2_USER')")
     @GetMapping
-    public String home(Model model) {
-        List<CourseDto> courses = courseService.getAllCourses();
-         model.addAttribute("courses", courses);
-         return "home.html";
+    public String dashboard(Model model, Principal principal) {
+        String username = principal.getName();
+        List<CourseDto> courses = courseService.getStudentAssignedCourses(username);
+        model.addAttribute("courses", courses);
+        return "home.html";
     }
-
 }

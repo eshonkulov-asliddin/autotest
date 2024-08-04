@@ -16,11 +16,16 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import uz.mu.autotest.dto.course.CourseDto;
 import uz.mu.autotest.dto.student.AddStudentRequest;
 import uz.mu.autotest.dto.student.StudentDto;
 import uz.mu.autotest.model.Student;
+import uz.mu.autotest.service.impl.CourseService;
 import uz.mu.autotest.service.impl.GroupService;
 import uz.mu.autotest.service.impl.StudentService;
+
+import java.security.Principal;
+import java.util.List;
 
 import static uz.mu.autotest.controller.util.KeyNames.GROUPS;
 import static uz.mu.autotest.controller.util.KeyNames.STUDENTS;
@@ -33,14 +38,20 @@ public class StudentController {
 
     @Value("${app.admin.studentsHtmlPage}")
     private String studentsHtmlPage;
+    @Value("${app.student.dashboardHtmlPage}")
+    private String studentsDashboardHtmlPage;
 
     private final StudentService studentService;
     private final GroupService groupService;
+    private final CourseService courseService;
 
+    @PreAuthorize("hasRole('STUDENT') or hasAuthority('OAUTH2_USER')")
     @GetMapping("/dashboard")
-    @PreAuthorize("hasRole('STUDENT')")
-    public String dashboard() {
-        return "student/dashboard.html";
+    public String dashboard(Model model, Principal principal) {
+        String username = principal.getName();
+        List<CourseDto> courses = courseService.getStudentAssignedCourses(username);
+        model.addAttribute("courses", courses);
+        return studentsDashboardHtmlPage;
     }
 
     @GetMapping

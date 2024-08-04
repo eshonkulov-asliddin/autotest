@@ -14,7 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import uz.mu.autotest.dto.CloneRepoRequest;
+import uz.mu.autotest.dto.repo.CloneRepoRequest;
 import uz.mu.autotest.model.Attempt;
 import uz.mu.autotest.model.Result;
 

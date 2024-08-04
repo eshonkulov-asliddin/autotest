@@ -1,8 +1,8 @@
 package uz.mu.autotest.extractor.java;
 
+import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
-
-import jakarta.xml.bind.annotation.*;
+import jakarta.xml.bind.annotation.XmlValue;
 import lombok.Getter;
 import lombok.Setter;
 

@@ -8,6 +8,7 @@ import jakarta.xml.bind.annotation.XmlElementWrapper;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import uz.mu.autotest.extractor.AbstractTestSuite;
 
 import java.util.List;
@@ -16,6 +17,7 @@ import java.util.List;
 @XmlAccessorType(XmlAccessType.FIELD)
 @Getter
 @Setter
+@ToString
 public class JavaTestSuite extends AbstractTestSuite {
     @XmlAttribute
     private String name;
@@ -36,7 +38,5 @@ public class JavaTestSuite extends AbstractTestSuite {
 
     @XmlElement(name = "testcase")
     private List<TestCase> testCases;
-
-    // Getters and setters
 }
 

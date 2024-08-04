@@ -8,9 +8,12 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.OneToMany;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @Entity
@@ -26,8 +29,13 @@ public class Attempt {
     @ManyToOne(cascade = CascadeType.MERGE)
     private StudentTakenLab studentTakenLab;
 
-    @OneToOne(mappedBy = "attempt", cascade = CascadeType.ALL, orphanRemoval = true)
-    private TestResults testResults;
+    @OneToMany(mappedBy = "attempt", cascade = CascadeType.PERSIST, orphanRemoval = true)
+    private List<TestResults> testResults = new ArrayList<>();
+
+    public void addTestResults(TestResults testResults) {
+        this.testResults.add(testResults);
+        testResults.setAttempt(this);
+    }
 
     @Override
     public String toString() {

@@ -5,22 +5,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import uz.mu.autotest.client.GithubClient;
-import uz.mu.autotest.converter.testsuite.TestResultEntityToTestResultDtoConverter;
-import uz.mu.autotest.dto.AttemptDto;
-import uz.mu.autotest.dto.SubmitTaskRequest;
-import uz.mu.autotest.dto.testsuite.TestResultDto;
-import uz.mu.autotest.exception.GetLastActionRunException;
+import uz.mu.autotest.dto.lab.SubmitTaskRequest;
 import uz.mu.autotest.exception.NotFoundException;
-import uz.mu.autotest.model.Attempt;
 import uz.mu.autotest.model.StudentTakenLab;
-import uz.mu.autotest.model.TestResults;
 import uz.mu.autotest.service.SubmitTaskService;
 import uz.mu.autotest.service.UserSessionData;
 import uz.mu.autotest.utils.GithubUrlParser;
 
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 @Service
 @RequiredArgsConstructor
@@ -29,8 +21,6 @@ public class GithubSubmitTaskService implements SubmitTaskService {
 
     private final StudentTakenLabService studentTakenLabService;
     private final GithubClient githubClient;
-    private final RetryService retryService;
-    private final TestResultEntityToTestResultDtoConverter testResultEntityToTestResultDtoConverter;
     private final InMemoryCacheService inMemoryCacheService;
 
     public void submitTask(SubmitTaskRequest request, String owner, String accessToken) {

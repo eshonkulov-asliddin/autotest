@@ -1,6 +1,6 @@
 package uz.mu.autotest.service;
 
-import uz.mu.autotest.dto.GroupLabAssignmentRequest;
+import uz.mu.autotest.dto.group.GroupLabAssignmentRequest;
 import uz.mu.autotest.model.GroupLabAssignment;
 
 import java.util.List;

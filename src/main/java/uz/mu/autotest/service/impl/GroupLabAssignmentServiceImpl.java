@@ -3,7 +3,7 @@ package uz.mu.autotest.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import uz.mu.autotest.dto.GroupLabAssignmentRequest;
+import uz.mu.autotest.dto.group.GroupLabAssignmentRequest;
 import uz.mu.autotest.exception.NotFoundException;
 import uz.mu.autotest.model.Course;
 import uz.mu.autotest.model.Group;

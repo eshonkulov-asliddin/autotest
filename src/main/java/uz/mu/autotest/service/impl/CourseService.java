@@ -11,12 +11,14 @@ import uz.mu.autotest.dto.group.GroupDto;
 import uz.mu.autotest.exception.NotFoundException;
 import uz.mu.autotest.model.Course;
 import uz.mu.autotest.model.Group;
+import uz.mu.autotest.model.Student;
 import uz.mu.autotest.model.Teacher;
 import uz.mu.autotest.repository.CourseRepository;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @AllArgsConstructor
@@ -27,7 +29,9 @@ public class CourseService {
     private final ConversionService conversionService;
     private final TeacherService teacherService;
     private final GroupService groupService;
+    private final StudentService studentService;
 
+    //TODO: List courses according to the group
     public List<CourseDto> getAllCourses() {
         log.info("Retrieving all courses ....");
         List<Course> allCourses = courseRepository.findAll();
@@ -36,6 +40,21 @@ public class CourseService {
                 .toList();
     }
 
+    public List<CourseDto> getStudentAssignedCourses(String username) {
+        Optional<Student> studentByOAuth2Login = studentService.getStudentByOAuth2Login(username);
+        if (studentByOAuth2Login.isEmpty()) {
+            throw new NotFoundException("Student not found");
+        }
+
+        Student student = studentByOAuth2Login.get();
+        Set<Group> groups = student.getGroups();
+        List<Course> courses = courseRepository.findByGroupIds(groups.stream().map(Group::getId).toList());
+        return courses.stream()
+                .map(course -> conversionService.convert(course, CourseDto.class))
+                .toList();
+
+
+    }
     public Optional<Course> getByName(String courseName) {
         Optional<Course> course = courseRepository.findByName(courseName);
         log.info("Retrieved course by name: {}", course);

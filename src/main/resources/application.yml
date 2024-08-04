@@ -10,9 +10,14 @@ spring:
     show-sql: true
     properties:
       hibernate:
+        jdbc:
+          batch_size: 50
+          order_inserts: true
+          order_updates: true
         format_sql: true
         use_sql_comments: true
         dialect: org.hibernate.dialect.MySQLDialect
+#        generate_statistics: true
 
   security:
     oauth2:
@@ -21,11 +26,12 @@ spring:
           github:
             client-id:  ${CLIENT_ID}
             client-secret: ${CLIENT_SECRET}
-            scope: ${SCOPE}
-logging:
-  level:
-    org.springframework.security: DEBUG
-    org.thymeleaf: DEBUG
+            scope: ${SCOPES}
+
+#logging:
+#  level:
+#    org.springframework.security: DEBUG
+#    org.thymeleaf: DEBUG
 
 server:
   port: 9091
@@ -47,6 +53,8 @@ app:
   teacher:
     dashboardHtmlPage: /teacher/dashboard.html
     labManagementHtmlPage: /teacher/lab-management.html
+  student:
+    dashboardHtmlPage: student/dashboard.html
 
 
 testResults:
@@ -56,3 +64,5 @@ testResults:
 
 queue:
   attempts: queue/attempts
+  repositories: queue/repositories
+

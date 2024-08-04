@@ -1,4 +1,4 @@
-package uz.mu.autotest.processor;
+package uz.mu.autotest.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

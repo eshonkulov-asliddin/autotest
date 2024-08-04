@@ -1,4 +1,4 @@
-package uz.mu.autotest.dto;
+package uz.mu.autotest.dto.repo;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

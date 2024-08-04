@@ -1,4 +1,4 @@
-package uz.mu.autotest.dto;
+package uz.mu.autotest.dto.group;
 
 import jakarta.validation.constraints.NotNull;
 

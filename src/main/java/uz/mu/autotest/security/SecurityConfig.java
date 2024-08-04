@@ -12,7 +12,6 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.annotation.web.configurers.LogoutConfigurer;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -36,7 +35,6 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth ->
                        auth
                                .requestMatchers("/login", "/app.js", "/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
-                               .requestMatchers("/mu-autotest").permitAll()
                                .requestMatchers(HttpMethod.POST, "/workflow/results").permitAll()
                                .anyRequest().authenticated()
                     )
@@ -52,7 +50,13 @@ public class SecurityConfig {
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(customOAuth2UserService)
                         ))
-                .logout(LogoutConfigurer::permitAll);
+                .logout(logout -> logout
+                    .logoutUrl("/logout")
+                    .logoutSuccessUrl("/login?logout")
+                    .invalidateHttpSession(true)
+                    .clearAuthentication(true)
+                    .deleteCookies("JSESSIONID", "XSRF-TOKEN")
+                );
 
         return security.build();
     }

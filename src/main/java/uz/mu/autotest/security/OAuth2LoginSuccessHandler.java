@@ -29,7 +29,6 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         CustomOAuth2User oAuth2User = (CustomOAuth2User) authentication.getPrincipal();
         String loginName = oAuth2User.getLogin();
-        String oAuth2Name = oAuth2User.getName();
 
         // Assuming you have a way to get the current user
         String currentlyAuthorizedUserUsername = authService.getCurrentlyAuthorizedUserUsername();
@@ -42,11 +41,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
                 student.setLogin(loginName);
                 updated = true;
             }
-// TODO think about validation
-//            if (student.getLoginName() == null || student.getLoginName().isEmpty()) {
-//                student.setLoginName(oAuth2Name);
-//                updated = true;
-//            }
+
             if (updated) {
                 studentRepository.save(student);
                 log.info("Updated student with OAuth2 login: {}", loginName);

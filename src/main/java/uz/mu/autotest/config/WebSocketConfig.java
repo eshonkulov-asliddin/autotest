@@ -1,4 +1,4 @@
-package uz.mu.autotest.websocket;
+package uz.mu.autotest.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;

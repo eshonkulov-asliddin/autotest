@@ -1,4 +1,4 @@
-package uz.mu.autotest.security;
+package uz.mu.autotest.config;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -16,6 +16,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import uz.mu.autotest.security.CustomAuthenticationSuccessHandler;
+import uz.mu.autotest.security.CustomOAuth2UserService;
+import uz.mu.autotest.security.OAuth2LoginSuccessHandler;
 
 @Configuration
 @PropertySource("classpath:application.yml")

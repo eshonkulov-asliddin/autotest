@@ -1,8 +1,7 @@
 package uz.mu.autotest.service;
 
-import uz.mu.autotest.dto.AttemptDto;
-import uz.mu.autotest.dto.SubmitTaskRequest;
+import uz.mu.autotest.dto.lab.SubmitTaskRequest;
 
 public interface SubmitTaskService {
-    AttemptDto submitTask(SubmitTaskRequest request, String owner, String accessToken);
+    void submitTask(SubmitTaskRequest request, String owner, String accessToken);
 }

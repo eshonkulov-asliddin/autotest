@@ -3,7 +3,8 @@ package uz.mu.autotest.extractor;
 import jakarta.xml.bind.JAXBException;
 
 import java.io.File;
+import java.util.List;
 
 public interface Parser<T> {
-    T parse(File file) throws JAXBException;
+    List<T> parse(File file) throws JAXBException;
 }

@@ -1,4 +1,4 @@
-package uz.mu.autotest.dto;
+package uz.mu.autotest.dto.student;
 
 public record StudentTakenLabDto(
        Long id,

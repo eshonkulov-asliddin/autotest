@@ -1,4 +1,4 @@
-const STOMP_URL = 'ws://localhost:9091/mu-autotest';
+const STOMP_URL = 'wss://eshonkulov-asliddin.jprq.app/mu-autotest';
 const SUBMIT_TASK_BUTTON_ID = 'submitTask';
 const START_TASK_BUTTON_ID = 'startTask';
 const SPINNER_DISPLAY_STYLE = 'inline-block';
@@ -24,6 +24,11 @@ function showSpinner(buttonId, spinnerId) {
 
 function hideSpinner(buttonId, spinnerId) {
     toggleSpinner(buttonId, spinnerId, 'hide');
+}
+
+function hideButton(buttonId) {
+    const button = document.getElementById(buttonId);
+    button.style.display = 'none';
 }
 
 function reconnectIfNecessary() {
@@ -55,23 +60,31 @@ function submitTask() {
     stompClient.onConnect = (frame) => {
         console.log('Connected: ' + frame);
         stompClient.subscribe('/user/queue/attempts', (response) => {
-            console.log(JSON.parse(response.body));
-            addAccordionItem(JSON.parse(response.body));
-            disconnect();
-            sessionStorage.clear();
+            const buildResult = JSON.parse(response.body);
+            console.log(buildResult);
+
+            if (buildResult.status === 'error') {
+                alert(buildResult.message);
+            }else {
+                addAccordionItem(buildResult);
+            }
             hideSpinner(SUBMIT_TASK_BUTTON_ID, `${SUBMIT_TASK_BUTTON_ID}Spinner`);
+            sessionStorage.clear();
+            disconnect();
         });
         buildAndTestRepository();
     };
 
     stompClient.onWebSocketError = (error) => {
         console.error('Error with websocket', error);
+        sessionStorage.clear();
         hideSpinner(SUBMIT_TASK_BUTTON_ID, `${SUBMIT_TASK_BUTTON_ID}Spinner`);
     };
 
     stompClient.onStompError = (frame) => {
         console.error('Broker reported error: ' + frame.headers['message']);
         console.error('Additional details: ' + frame.body);
+        sessionStorage.clear();
         hideSpinner(SUBMIT_TASK_BUTTON_ID, `${SUBMIT_TASK_BUTTON_ID}Spinner`);
     };
 }
@@ -83,11 +96,17 @@ function startTask() {
         console.log('Connected: ' + frame);
         stompClient.subscribe('/user/queue/repositories', (response) => {
             const userTakenLab = JSON.parse(response.body);
-            const { id, githubUrl } = userTakenLab;
-            console.log("Started Lab: ", userTakenLab);
 
-            hideSpinner(START_TASK_BUTTON_ID, `${START_TASK_BUTTON_ID}Spinner`);
-            addRepositoryCard(githubUrl, id);
+            if (userTakenLab.status === 'error') {
+                alert(userTakenLab.message);
+                hideSpinner(START_TASK_BUTTON_ID, `${START_TASK_BUTTON_ID}Spinner`);
+            } else {
+                const { id, githubUrl } = userTakenLab;
+                console.log("Started Lab: ", userTakenLab);
+
+                hideSpinner(START_TASK_BUTTON_ID, `${START_TASK_BUTTON_ID}Spinner`);
+                addRepositoryCard(githubUrl, id);
+            }
             disconnect();
         });
         generateRepository();
@@ -95,11 +114,13 @@ function startTask() {
 
     stompClient.onWebSocketError = (error) => {
         console.error('Error with websocket', error);
+        sessionStorage.clear();
     };
 
     stompClient.onStompError = (frame) => {
         console.error('Broker reported error: ' + frame.headers['message']);
         console.error('Additional details: ' + frame.body);
+        sessionStorage.clear();
     };
 }
 
@@ -187,6 +208,7 @@ function createSubmitTaskButton(labId) {
 }
 
 function buildAccordionItem(attempt) {
+    attempt.result === 'SUCCESS' ? hideButton("submitTask") : console.error('Test failed');
     const color = attempt.result === 'SUCCESS' ? "bg-success text-white" : "bg-danger text-white";
     const item = document.createElement('div');
     item.className = 'accordion-item';
@@ -215,17 +237,21 @@ function buildAccordionItem(attempt) {
     body.className = 'accordion-body';
     body.innerHTML = `You can see details <a href="${attempt.detailsUrl}" target="_blank">here</a>`;
 
-    if (attempt.testResultDto && attempt.testResultDto.testCases && attempt.testResultDto.testCases.length > 0) {
-        const nestedAccordion = document.createElement('div');
-        nestedAccordion.className = 'accordion accordion-flush';
-        nestedAccordion.id = `nestedAccordion_${attempt.id}`;
+    if (attempt.testResultDto && attempt.testResultDto.length > 0) {
+        attempt.testResultDto.forEach(testResult => {
+            if (testResult && testResult.testCases && testResult.testCases.length > 0) {
+                const nestedAccordion = document.createElement('div');
+                nestedAccordion.className = 'accordion accordion-flush';
+                nestedAccordion.id = `nestedAccordion_${attempt.id}`;
 
-        attempt.testResultDto.testCases.forEach(testCase => {
-            const nestedItem = buildNestedAccordionItem(testCase, attempt.id);
-            nestedAccordion.appendChild(nestedItem);
-        });
+                testResult.testCases.forEach(testCase => {
+                    const nestedItem = buildNestedAccordionItem(testCase, attempt.id);
+                    nestedAccordion.appendChild(nestedItem);
+                });
 
-        body.appendChild(nestedAccordion);
+                body.appendChild(nestedAccordion);
+            }
+        })
     }
 
     collapse.appendChild(body);
@@ -284,11 +310,6 @@ function buildNestedAccordionItem(testCase, parentAttemptId) {
 
     return item;
 }
-
-
-// function addAccordionItem(attempt) {
-//     $("#accordionFlushExample").append(buildAccordionItem(attempt.id, attempt.result, `Verification ${attempt.runNumber}`, attempt.detailsUrl));
-// }
 
 function addAccordionItem(attempt) {
     $("#accordionFlushExample").append(buildAccordionItem(attempt));

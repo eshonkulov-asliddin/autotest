@@ -1,9 +1,10 @@
-package uz.mu.autotest.security;
+package uz.mu.autotest.config;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -11,11 +12,13 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.annotation.web.configurers.LogoutConfigurer;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import uz.mu.autotest.security.CustomAuthenticationSuccessHandler;
+import uz.mu.autotest.security.CustomOAuth2UserService;
+import uz.mu.autotest.security.OAuth2LoginSuccessHandler;
 
 @Configuration
 @PropertySource("classpath:application.yml")
@@ -35,7 +38,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth ->
                        auth
                                .requestMatchers("/login", "/app.js", "/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
-                               .requestMatchers("/mu-autotest").permitAll()
+                               .requestMatchers(HttpMethod.POST, "/workflow/results").permitAll()
                                .anyRequest().authenticated()
                     )
                 .formLogin(formLogin ->
@@ -50,7 +53,13 @@ public class SecurityConfig {
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(customOAuth2UserService)
                         ))
-                .logout(LogoutConfigurer::permitAll);
+                .logout(logout -> logout
+                    .logoutUrl("/logout")
+                    .logoutSuccessUrl("/login?logout")
+                    .invalidateHttpSession(true)
+                    .clearAuthentication(true)
+                    .deleteCookies("JSESSIONID", "XSRF-TOKEN")
+                );
 
         return security.build();
     }

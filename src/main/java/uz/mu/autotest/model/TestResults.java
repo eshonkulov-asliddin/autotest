@@ -7,8 +7,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -33,10 +33,10 @@ public abstract class TestResults {
     private int tests;
     private double time;
 
-    @OneToMany(mappedBy = "testResults", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "testResults", cascade = CascadeType.PERSIST, orphanRemoval = true)
     private List<TestCaseEntity> testCaseEntities;
 
-    @OneToOne
+    @ManyToOne
     private Attempt attempt;
 
 }

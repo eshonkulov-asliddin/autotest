@@ -2,13 +2,12 @@ package uz.mu.autotest.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpClientErrorException;
 import uz.mu.autotest.client.GithubClient;
-import uz.mu.autotest.dto.GenerateRepositoryRequest;
-import uz.mu.autotest.dto.StudentTakenLabDto;
+import uz.mu.autotest.dto.repo.GenerateRepositoryRequest;
+import uz.mu.autotest.dto.student.StudentTakenLabDto;
 import uz.mu.autotest.exception.GenerateRepositoryException;
 import uz.mu.autotest.exception.NotFoundException;
 import uz.mu.autotest.model.Lab;
@@ -31,10 +30,9 @@ public class GithubRepositoryService implements RepositoryService {
     private final StudentService studentService;
     private final StudentTakenLabService studentTakenLabService;
 
-    @Transactional
     public StudentTakenLabDto generateRepository(GenerateRepositoryRequest request, String labOwner, String accessToken) {
         Long labId = request.labId();
-        if (labId == null ) throw new IllegalArgumentException();
+        if (labId == null ) throw new IllegalArgumentException("Lab id is required");
         log.info("generate repository called for lab id: {}", labId);
 
         Optional<Lab> lab = labService.getById(labId);
@@ -50,10 +48,9 @@ public class GithubRepositoryService implements RepositoryService {
         boolean doIncludeAllBranch = false;
         boolean isPrivate = false;
 
-        ResponseEntity<String> genereateRepositoryResponse = githubClient.generateRepository(labOwner, templateRepoOwner, templateRepo, description, doIncludeAllBranch, isPrivate, accessToken);
-        log.info("Generate repository response: {}", genereateRepositoryResponse);
-
-        if (genereateRepositoryResponse.getStatusCode() == HttpStatus.CREATED) {
+        try {
+            ResponseEntity<String> generateRepositoryResponse = githubClient.generateRepository(labOwner, templateRepoOwner, templateRepo, description, doIncludeAllBranch, isPrivate, accessToken);
+            log.info("Generate repository response: {}", generateRepositoryResponse);
             String labGithubUrl = "https://github.com" + "/" + labOwner + "/" + templateRepo;
             StudentTakenLab studentTakenLab = new StudentTakenLab();
             studentTakenLab.setGithubUrl(labGithubUrl);
@@ -67,7 +64,8 @@ public class GithubRepositoryService implements RepositoryService {
             log.info("Insert new Lab: {}", studentTakenLab);
 
             return new StudentTakenLabDto(studentTakenLab.getId(), studentTakenLab.getGithubUrl(), String.valueOf(studentTakenLab.getStatus()), studentTakenLab.getCourse().getId(), studentTakenLab.getLab().getId(), studentTakenLab.getUser().getId());
+        }catch (HttpClientErrorException e){
+            throw new GenerateRepositoryException(String.format("Failed to generate repository, because repository %s already exists", templateRepo));
         }
-        throw new GenerateRepositoryException("Failed to generate repository");
     }
 }

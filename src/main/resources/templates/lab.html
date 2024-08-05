@@ -96,29 +96,33 @@ http://www.thymeleaf.org ">
                  th:attr="aria-labelledby='heading_' + ${attempt.id}, data-bs-parent='#accordionFlushExample'">
                 <div class="accordion-body">
                     <p>You can see details <a th:href="@{${attempt.detailsUrl}}" target="_blank">here</a></p>
-                    <div class="accordion accordion-flush" th:if="${attempt.testResultDto.testCases.size() > 0}" th:id="'nestedAccordion_' + ${attempt.id}">
-                        <div class="accordion-item" th:each="testCase : ${attempt.testResultDto.testCases}">
-                            <h2 class="accordion-header" th:id="'case_heading_' + ${attempt.id} + '_' + ${testCase.id}">
-                                <button class="accordion-button collapsed"
-                                        th:classappend="${testCase.failure != null ? 'bg-danger text-white' : 'bg-success text-white'}"
-                                        type="button"
-                                        data-bs-toggle="collapse"
-                                        th:attr="data-bs-target='#case_accordion_' + ${attempt.id} + '_' + ${testCase.id}, aria-controls='case_accordion_' + ${attempt.id} + '_' + ${testCase.id}">
-                                    Test Case: <span th:text="${testCase.name}"></span>
-                                </button>
-                            </h2>
-                            <div th:id="'case_accordion_' + ${attempt.id} + '_' + ${testCase.id}"
-                                 class="accordion-collapse collapse"
-                                 th:attr="aria-labelledby='case_heading_' + ${attempt.id} + '_' + ${testCase.id}, data-bs-parent='#nestedAccordion_' + ${attempt.id}">
-                                <div class="accordion-body">
-                                    <p>Classname: <span th:text="${testCase.classname}"></span></p>
-                                    <p>Time: <span th:text="${testCase.time}"></span>s</p>
-                                    <div th:if="${testCase.failure != null}">
-                                        <p>Failure Message: <span th:text="${testCase.failure.type}"></span></p>
-                                        <p>Failure Content: <pre th:text="${testCase.failure.details}"></pre></p>
-                                    </div>
-                                    <div th:if="${testCase.failure == null}">
-                                        <p>Test passed successfully.</p>
+
+                    <div th:each="testResultDto : ${attempt.testResultDto}">
+
+                        <div class="accordion accordion-flush" th:if="${testResultDto.testCases.size() > 0}" th:id="'nestedAccordion_' + ${attempt.id}">
+                            <div class="accordion-item" th:each="testCase : ${testResultDto.testCases}">
+                                <h2 class="accordion-header" th:id="'case_heading_' + ${attempt.id} + '_' + ${testCase.id}">
+                                    <button class="accordion-button collapsed"
+                                            th:classappend="${testCase.failure != null ? 'bg-danger text-white' : 'bg-success text-white'}"
+                                            type="button"
+                                            data-bs-toggle="collapse"
+                                            th:attr="data-bs-target='#case_accordion_' + ${attempt.id} + '_' + ${testCase.id}, aria-controls='case_accordion_' + ${attempt.id} + '_' + ${testCase.id}">
+                                        Test Case: <span th:text="${testCase.name}"></span>
+                                    </button>
+                                </h2>
+                                <div th:id="'case_accordion_' + ${attempt.id} + '_' + ${testCase.id}"
+                                     class="accordion-collapse collapse"
+                                     th:attr="aria-labelledby='case_heading_' + ${attempt.id} + '_' + ${testCase.id}, data-bs-parent='#nestedAccordion_' + ${attempt.id}">
+                                    <div class="accordion-body">
+                                        <p>Classname: <span th:text="${testCase.classname}"></span></p>
+                                        <p>Time: <span th:text="${testCase.time}"></span>s</p>
+                                        <div th:if="${testCase.failure != null}">
+                                            <p>Failure Message: <span th:text="${testCase.failure.type}"></span></p>
+                                            <p>Failure Content: <pre th:text="${testCase.failure.details}"></pre></p>
+                                        </div>
+                                        <div th:if="${testCase.failure == null}">
+                                            <p>Test passed successfully.</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -142,9 +146,6 @@ http://www.thymeleaf.org ">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/1.9.1/showdown.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
-        crossorigin="anonymous"></script>
 
 </body>
 </html>

@@ -10,9 +10,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import uz.mu.autotest.dto.AttemptDto;
-import uz.mu.autotest.dto.LabStatistics;
+import uz.mu.autotest.dto.attempt.AttemptDto;
 import uz.mu.autotest.dto.lab.LabDto;
+import uz.mu.autotest.dto.lab.LabStatistics;
 import uz.mu.autotest.model.Lab;
 import uz.mu.autotest.model.StudentTakenLab;
 import uz.mu.autotest.service.impl.AttemptService;
@@ -40,6 +40,7 @@ public class LabController {
     private final AttemptService attemptService;
     private final ReadmeService readmeService;
 
+    @PreAuthorize("hasRole('STUDENT') or hasAuthority('OAUTH2_USER')")
     @GetMapping("/courses/{courseId}")
     public String getLabsByCourseId(@PathVariable(name = "courseId") Long courseId, Principal principal, Model model) {
         String username = principal.getName();
@@ -65,6 +66,7 @@ public class LabController {
         return "labs.html";
     }
 
+    @PreAuthorize("hasRole('STUDENT') or hasAuthority('OAUTH2_USER')")
     @GetMapping("/{labId}/start")
     public String getNotStartedLabById(@PathVariable(name= "labId") Long labId, Model model) {
         Optional<Lab> notStartedLab = labService.getById(labId);

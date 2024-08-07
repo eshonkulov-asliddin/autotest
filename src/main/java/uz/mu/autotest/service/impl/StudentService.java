@@ -72,13 +72,20 @@ public class StudentService {
     }
 
     public Page<StudentDto> getStudentsByGroupId(Long groupId, Pageable pageable) {
-        Page<Student> students = studentRepository.findStudentsByGroupId(groupId, pageable);
+        Page<Student> students = studentRepository.findByGroupId(groupId, pageable);
         List<StudentDto> studentDtos = students.getContent().stream()
                 .map(student -> conversionService.convert(student, StudentDto.class))
                 .toList();
 
         return new PageImpl<>(studentDtos, pageable, students.getTotalElements());
 
+    }
+
+    public List<StudentDto> getStudentsByGroupId(Long groupId) {
+        List<Student> students = studentRepository.findByGroupId(groupId);
+        return students.stream()
+                .map(student -> conversionService.convert(student, StudentDto.class))
+                .toList();
     }
 
     public Optional<Student> getStudentByOAuth2Login(String loginName) {

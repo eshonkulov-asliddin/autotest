@@ -42,7 +42,7 @@
                 </thead>
                 <tbody>
                 <tr th:each="lab: ${labsAssignedToGroup}">
-                    <td th:text="${lab.labName}">Lab 1</td>
+                    <td th:text="${lab.name}">Lab 1</td>
                     <td>
                         <span class="badge badge-pill completed-badge"
                               data-toggle="modal"
@@ -214,7 +214,7 @@
                     document.getElementById('notStartedLabName').innerText = `Lab ${labId}`;
                     const pendingList = document.getElementById('notStartedStudentsList');
                     pendingList.innerHTML = '';
-                    data.pendingStudents.forEach(student => {
+                    data.notStartedStudents.forEach(student => {
                         const listItem = document.createElement('li');
                         listItem.className = 'list-group-item';
                         listItem.innerText = student.firstName+ ' ' +student.lastName;

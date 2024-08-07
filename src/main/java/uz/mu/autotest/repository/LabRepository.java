@@ -9,6 +9,8 @@ import java.util.List;
 
 public interface LabRepository extends JpaRepository<Lab, Long> {
 
-    @Query("SELECT l FROM Lab l WHERE l.course.id = :courseId ")
-    List<Lab> findLabsByCourseId(@Param("courseId") Long courseId);
+    List<Lab> findByCourseId(@Param("courseId") Long courseId);
+
+    @Query("SELECT l FROM Lab l JOIN l.course c JOIN c.groups g WHERE c.id = :courseId AND g.id = :groupId")
+    List<Lab> findByCourseIdAndGroupId(@Param("courseId") Long courseId, @Param("groupId") Long groupId);
 }

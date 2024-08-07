@@ -5,8 +5,12 @@ import org.springframework.data.jpa.repository.Query;
 import uz.mu.autotest.model.Group;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface GroupRepository extends JpaRepository<Group, Long> {
+
+    Optional<Group> findById(Long id);
+
     @Query("SELECT g FROM Group g WHERE g.id IN :groupIds")
     List<Group> findByIdIn(List<Long> groupIds);
 

@@ -106,14 +106,6 @@ public class TeacherController {
         return dashboardHtmlPage;
     }
 
-//    @GetMapping("/courses/{courseId}/labs")
-//    public String seeLabs(@PathVariable("courseId") Long courseId, Principal principal, Model model) {
-//        String username = principal.getName();
-//        List<LabDto> labsByCourseId = labService.getLabsByCourseId(username, courseId);
-//        model.addAttribute("labs", labsByCourseId);
-//        return dashboardHtmlPage;
-//    }
-
     @PreAuthorize("hasRole('TEACHER')")
     @PostMapping("/group-lab-assignment")
     public String createGroupLabAssignment(@RequestBody GroupLabAssignmentRequest request) {
@@ -125,20 +117,14 @@ public class TeacherController {
     @GetMapping("/courses/{courseId}/labs")
     public String getLabsByGroupId(@PathVariable("courseId") Long courseId,
                                    @RequestParam(value = "groupId") Long groupId,
-                                 Principal principal,
-                                 Model model) {
-        String username = principal.getName();
+                                   Principal principal,
+                                   Model model) {
+        Course course = courseService.getById(courseId);
         Group group = groupService.getGroupById(groupId);
-        CourseDto course = courseService.getCourseById(courseId);
-        List<GroupLabAssignment> labsByGroupIdAndCourseId = groupLabAssignmentService.getLabsByGroupIdAndCourseId(groupId, courseId);
-        List<Lab> labsAssignedToGroup = labsByGroupIdAndCourseId.stream().map(GroupLabAssignment::getLab).toList();
-        Set<Long> labIdsAssignedToGroup = labsAssignedToGroup.stream().map(Lab::getId).collect(Collectors.toSet());
-        List<LabDto> labs = labService.getLabsByCourseId(username, courseId);
-        List<LabDto> labsNotAssignedToGroup = labs.stream().filter(labDto -> !labIdsAssignedToGroup.contains(labDto.id())).toList();
+        List<LabDto> labsAssignedToGroup = labService.getLabsByCourseIdAndGroupId(courseId, groupId);
         model.addAttribute("labsAssignedToGroup", labsAssignedToGroup);
-        model.addAttribute("labsNotAssignedToGroup", labsNotAssignedToGroup);
-        model.addAttribute("course", course);
         model.addAttribute("group", group);
+        model.addAttribute("course", course);
         return labManagementHtmlPage;
     }
 

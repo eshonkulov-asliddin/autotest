@@ -113,6 +113,7 @@ public class GithubClient {
         HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
 
         String generateRepoUrl = githubApiUrl + "/repos/" + templateRepoOwner + "/" + templateRepo + "/generate";
+        log.info("Generate Repo Url: {}", generateRepoUrl);
         return restTemplate.exchange(generateRepoUrl, HttpMethod.POST, entity, String.class);
     }
 

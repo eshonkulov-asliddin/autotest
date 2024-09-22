@@ -14,6 +14,8 @@ import uz.mu.autotest.utils.GithubUrlParser;
 
 import java.util.Optional;
 
+import static uz.mu.autotest.utils.CacheUtil.getUniqueKey;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -37,6 +39,9 @@ public class GithubSubmitTaskService implements SubmitTaskService {
         log.info("Extracted Repo Name: {}", repo);
         ResponseEntity<String> response = githubClient.triggerWorkflow(owner, repo, accessToken);
         log.info("Trigger Workflow Response: {}", response);
-        inMemoryCacheService.store(owner, new UserSessionData(accessToken, studentTakenLab.get()));
+        String key = getUniqueKey(owner, repo);
+        inMemoryCacheService.store(key, new UserSessionData(accessToken, studentTakenLab.get()));
+        log.info("update cache with key: {}", key);
     }
+
 }

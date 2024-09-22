@@ -32,12 +32,13 @@ function hideButton(buttonId) {
 }
 
 function reconnectIfNecessary() {
+    const repoName = $(`#${SUBMIT_TASK_BUTTON_ID}`).data("repo-name");
     if (sessionStorage.getItem(TASK_IN_PROGRESS_KEY) === 'true') {
         showSpinner(SUBMIT_TASK_BUTTON_ID, `${SUBMIT_TASK_BUTTON_ID}Spinner`);
         stompClient.activate();
         stompClient.onConnect = (frame) => {
             console.log('Connected: ' + frame);
-            stompClient.subscribe('/user/queue/attempts', (response) => {
+            stompClient.subscribe(`/user/queue/attempts/${repoName}`, (response) => {
                 console.log(JSON.parse(response.body));
                 addAccordionItem(JSON.parse(response.body));
                 disconnect();
@@ -51,6 +52,7 @@ window.addEventListener('load', reconnectIfNecessary);
 
 function submitTask() {
     const labId = parseInt($(`#${SUBMIT_TASK_BUTTON_ID}`).data("lab-id"));
+    const repoName = $(`#${SUBMIT_TASK_BUTTON_ID}`).data("repo-name");
     console.log("lab id", labId);
     showSpinner(SUBMIT_TASK_BUTTON_ID, `${SUBMIT_TASK_BUTTON_ID}Spinner`);
     sessionStorage.setItem(TASK_IN_PROGRESS_KEY, 'true');
@@ -59,7 +61,7 @@ function submitTask() {
     stompClient.activate();
     stompClient.onConnect = (frame) => {
         console.log('Connected: ' + frame);
-        stompClient.subscribe('/user/queue/attempts', (response) => {
+        stompClient.subscribe(`/user/queue/attempts/${repoName}`, (response) => {
             const buildResult = JSON.parse(response.body);
             console.log(buildResult);
 

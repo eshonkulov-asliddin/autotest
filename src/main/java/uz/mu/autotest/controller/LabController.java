@@ -73,7 +73,9 @@ public class LabController {
         Optional<StudentTakenLab> userTakenLab = studentTakenLabService.getById(labId);
 
         if (userTakenLab.isPresent()) {
-            String readmeUrl = GithubUrlParser.generateReadmeUrl(userTakenLab.get().getLab().getGithubUrl());
+            String githubUrl = userTakenLab.get().getLab().getGithubUrl();
+            String repoName = GithubUrlParser.extractRepoName(githubUrl);
+            String readmeUrl = GithubUrlParser.generateReadmeUrl(githubUrl);
             String readmeHtml = readmeService.getReadmeHtml(readmeUrl);
             log.info("Retrieved Started Lab: {}", userTakenLab.get());
             List<AttemptDto> attemptsByUserTakenLabId = attemptService.getAttemptsByUserTakenLabId(userTakenLab.get().getId());
@@ -81,6 +83,7 @@ public class LabController {
             model.addAttribute("lab", userTakenLab.get());
             model.addAttribute("attempts", attemptsByUserTakenLabId);
             model.addAttribute("readmeHtml", readmeHtml);
+            model.addAttribute("repoName", repoName);
         }else {
             String readmeUrl = GithubUrlParser.generateReadmeUrl(notStartedLab.get().getGithubUrl());
             String readmeHtml = readmeService.getReadmeHtml(readmeUrl);

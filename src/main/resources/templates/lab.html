@@ -72,7 +72,7 @@ http://www.thymeleaf.org ">
 
     <div id="submitTaskDiv" class="row justify-content-center">
         <div class="col-md-2" th:if="${lab.status.name() == 'STARTED'}">
-            <button id="submitTask" class="btn btn-dark btn-block" th:data-lab-id="${lab.id}">
+            <button id="submitTask" class="btn btn-dark btn-block" th:data-lab-id="${lab.id}" th:data-repo-name="${repoName}">
                 <i class="fab fa-github mr-1"></i>
                 Submit
                 <span id="submitTaskSpinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display:none;"></span>

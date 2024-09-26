@@ -1,6 +1,11 @@
 package uz.mu.autotest.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -32,6 +37,7 @@ public class WebsocketController {
     private final OAuth2AuthorizedClientService clientService;
     private final GithubRepositoryService githubRepositoryService;
     private final SimpMessagingTemplate simpMessagingTemplate;
+    private final ObjectMapper objectMapper;
 
     //TODO implement RabbitMQ interaction for submitTask
     @MessageMapping("/submitTask")
@@ -40,12 +46,12 @@ public class WebsocketController {
         OAuth2AuthenticationToken oAuth2AuthenticationToken = (OAuth2AuthenticationToken) principal;
         OAuth2AuthorizedClient client = clientService.loadAuthorizedClient(oAuth2AuthenticationToken.getAuthorizedClientRegistrationId(), oAuth2AuthenticationToken.getName());
         String accessToken = "Bearer " + client.getAccessToken().getTokenValue();
-
+        log.info("Task {} submitted by {}", request, login);
         githubSubmitTaskService.submitTask(request, login, accessToken);
     }
 
     @MessageMapping("/generateRepository")
-    public void generateRepository(GenerateRepositoryRequest request, @AuthenticationPrincipal Principal principal) {
+    public void generateRepository(GenerateRepositoryRequest request, @AuthenticationPrincipal Principal principal) throws JsonProcessingException {
         String login = principal.getName();
         OAuth2AuthenticationToken oAuth2AuthenticationToken = (OAuth2AuthenticationToken) principal;
         OAuth2AuthorizedClient client = clientService.loadAuthorizedClient(oAuth2AuthenticationToken.getAuthorizedClientRegistrationId(), oAuth2AuthenticationToken.getName());
@@ -55,9 +61,19 @@ public class WebsocketController {
             StudentTakenLabDto studentTakenLabDto = githubRepositoryService.generateRepository(request, login, accessToken);
             simpMessagingTemplate.convertAndSendToUser(login, studentSubscribedQueue, studentTakenLabDto);
         }catch (Exception e) {
-            String errorMessage = String.format("{\"status\": \"error\", \"message\": \"%s\"}", e.getMessage());
+            ErrorMessage message = new ErrorMessage("error", e.getMessage());
+            String errorMessage = objectMapper.writeValueAsString(message);
             simpMessagingTemplate.convertAndSendToUser(login, studentSubscribedQueue, errorMessage);
         }
     }
 
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    static class ErrorMessage {
+        String status;
+        String message;
+    }
 }
+
+

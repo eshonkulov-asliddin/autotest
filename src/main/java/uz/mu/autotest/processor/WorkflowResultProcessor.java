@@ -31,6 +31,7 @@ public class WorkflowResultProcessor {
 
 
     public void process(WorkflowResultsPayload testResults) {
+        log.info("Start processing workflow results...");
         String owner = testResults.getRepository().getOwner();
         String url = testResults.getRepository().getName();
         long runId = testResults.getRunId();
@@ -47,12 +48,12 @@ public class WorkflowResultProcessor {
             Attempt attempt = testResultsProcessor.processTestResults(owner, repo, userSessionData.accessToken(), userSessionData.studentTakenLab(), runId);
             AttemptDto attemptDto = conversionService.convert(attempt, AttemptDto.class);
             String body = objectMapper.writeValueAsString(attemptDto);
+            log.info("Sent request to publish result {} to queue {}", body, studentSubscribedQueueFullPath);
             testResultsPublisherImpl.publish(owner, studentSubscribedQueueFullPath, body);
         }catch (Exception e) {
             String errorMessage = String.format("{\"status\": \"error\", \"message\": \"%s\"}", e.getMessage());
             testResultsPublisherImpl.publish(owner, studentSubscribedQueueFullPath, errorMessage);
-
-
+            log.error("Error while publishing result: {}", errorMessage);
         }
     }
 

@@ -66,7 +66,7 @@ public class GithubRepositoryService implements RepositoryService {
             return new StudentTakenLabDto(studentTakenLab.getId(), studentTakenLab.getGithubUrl(), String.valueOf(studentTakenLab.getStatus()), studentTakenLab.getCourse().getId(), studentTakenLab.getLab().getId(), studentTakenLab.getUser().getId());
         }catch (HttpClientErrorException e){
             log.error("Error generating repo: {}", e.toString());
-            throw new GenerateRepositoryException(String.format("Failed to generate repository: %s, cause: %s", templateRepo, e));
+            throw new GenerateRepositoryException(String.format("Failed to generate repository: %s, cause: %s", templateRepo, e.getMessage()));
         }
     }
 }

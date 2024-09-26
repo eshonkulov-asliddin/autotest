@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import uz.mu.autotest.dto.attempt.AttemptDto;
 import uz.mu.autotest.dto.lab.LabDto;
 import uz.mu.autotest.dto.lab.LabStatistics;
+import uz.mu.autotest.exception.NotFoundException;
 import uz.mu.autotest.model.Lab;
 import uz.mu.autotest.model.StudentTakenLab;
 import uz.mu.autotest.service.impl.AttemptService;
@@ -69,7 +70,6 @@ public class LabController {
     @PreAuthorize("hasRole('STUDENT') or hasAuthority('OAUTH2_USER')")
     @GetMapping("/{labId}/start")
     public String getNotStartedLabById(@PathVariable(name= "labId") Long labId, Model model) {
-        Optional<Lab> notStartedLab = labService.getById(labId);
         Optional<StudentTakenLab> userTakenLab = studentTakenLabService.getById(labId);
 
         if (userTakenLab.isPresent()) {
@@ -85,11 +85,18 @@ public class LabController {
             model.addAttribute("readmeHtml", readmeHtml);
             model.addAttribute("repoName", repoName);
         }else {
-            String readmeUrl = GithubUrlParser.generateReadmeUrl(notStartedLab.get().getGithubUrl());
+            Optional<Lab> notStartedLab = labService.getById(labId);
+            if (notStartedLab.isEmpty()) {
+                throw new NotFoundException(String.format("Lab with id {} NOT FOUND", labId));
+            }
+            String githubUrl = notStartedLab.get().getGithubUrl();
+            String repoName = GithubUrlParser.extractRepoName(githubUrl);
+            String readmeUrl = GithubUrlParser.generateReadmeUrl(githubUrl);
             String readmeHtml = readmeService.getReadmeHtml(readmeUrl);
             log.info("Retrieved Lab: {}", notStartedLab.get());
             model.addAttribute("lab", notStartedLab.get());
             model.addAttribute("readmeHtml", readmeHtml);
+            model.addAttribute("repoName", repoName);
         }
 
         return "lab.html";

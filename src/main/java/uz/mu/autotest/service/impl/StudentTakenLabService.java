@@ -25,6 +25,11 @@ public class StudentTakenLabService {
         return userTakenLabRepo.findByCourseIdAndUsername(courseId, username);
     }
 
+    public List<StudentTakenLab> getLabsByCourseIdAndLogin(Long courseId, String login) {
+        log.info("course id: {}, login: {}", courseId, login);
+        return userTakenLabRepo.findByCourseIdAndLogin(courseId, login);
+    }
+
     public Optional<StudentTakenLab> getById(Long labId) {
         return userTakenLabRepo.findById(labId);
     }

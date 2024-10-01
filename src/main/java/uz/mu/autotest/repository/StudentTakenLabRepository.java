@@ -17,9 +17,19 @@ public interface StudentTakenLabRepository extends JpaRepository<StudentTakenLab
     JOIN utl.user u
     JOIN utl.course c
     WHERE c.id = :courseId
-    AND u.login = :username
+    AND u.login = :login
+    """)
+    List<StudentTakenLab> findByCourseIdAndLogin(Long courseId, String login);
+
+    @Query("""
+    SELECT utl FROM StudentTakenLab utl
+    JOIN utl.user u
+    JOIN utl.course c
+    WHERE c.id = :courseId
+    AND u.username = :username
     """)
     List<StudentTakenLab> findByCourseIdAndUsername(Long courseId, String username);
+
     Optional<StudentTakenLab> findById(Long id);
 
     @Query("""

@@ -3,6 +3,7 @@ package uz.mu.autotest.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.util.comparator.Comparators;
 import uz.mu.autotest.dto.lab.LabResult;
 import uz.mu.autotest.dto.lab.StudentLabResult;
 import uz.mu.autotest.dto.lab.LabDto;
@@ -55,6 +56,7 @@ public class StudentLabResultsGenerator {
             studentsLabResults.add(studentLabResult);
         }
 
+        studentsLabResults.sort(Comparator.comparing(StudentLabResult::username));
         log.info("StudentLabResults: {}", studentsLabResults);
         return studentsLabResults;
     }

@@ -30,8 +30,10 @@ spring:
 
 #logging:
 #  level:
-#    org.springframework.security: DEBUG
+#    org.springframework: DEBUG
 #    org.thymeleaf: DEBUG
+#    org.hibernate: DEBUG
+
 
 server:
   port: 9091

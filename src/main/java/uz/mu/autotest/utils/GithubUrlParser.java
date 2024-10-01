@@ -1,8 +1,10 @@
 package uz.mu.autotest.utils;
 
+import lombok.extern.slf4j.Slf4j;
 import uz.mu.autotest.exception.GithubUrlParserException;
 import uz.mu.autotest.extractor.Runtime;
 
+@Slf4j
 public class GithubUrlParser {
 
     private static final String README_URL_PREFIX = "https://raw.githubusercontent.com";

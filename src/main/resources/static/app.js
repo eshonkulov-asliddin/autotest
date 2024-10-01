@@ -11,6 +11,7 @@ const stompClient = new StompJs.Client({
     brokerURL: STOMP_URL
 });
 
+
 function toggleSpinner(buttonId, spinnerId, action) {
     const button = document.getElementById(buttonId);
     const spinner = document.getElementById(spinnerId);
@@ -32,12 +33,13 @@ function hideButton(buttonId) {
 }
 
 function reconnectIfNecessary() {
+    const repoName = $(`#${SUBMIT_TASK_BUTTON_ID}`).data("repo-name");
     if (sessionStorage.getItem(TASK_IN_PROGRESS_KEY) === 'true') {
         showSpinner(SUBMIT_TASK_BUTTON_ID, `${SUBMIT_TASK_BUTTON_ID}Spinner`);
         stompClient.activate();
         stompClient.onConnect = (frame) => {
             console.log('Connected: ' + frame);
-            stompClient.subscribe('/user/queue/attempts', (response) => {
+            stompClient.subscribe(`/user/queue/attempts/${repoName}`, (response) => {
                 console.log(JSON.parse(response.body));
                 addAccordionItem(JSON.parse(response.body));
                 disconnect();
@@ -50,8 +52,10 @@ function reconnectIfNecessary() {
 window.addEventListener('load', reconnectIfNecessary);
 
 function submitTask() {
+    console.log("Started task submission....")
     const labId = parseInt($(`#${SUBMIT_TASK_BUTTON_ID}`).data("lab-id"));
-    console.log("lab id", labId);
+    const repoName = $(`#${SUBMIT_TASK_BUTTON_ID}`).data("repo-name");
+    // console.log("lab id", labId);
     showSpinner(SUBMIT_TASK_BUTTON_ID, `${SUBMIT_TASK_BUTTON_ID}Spinner`);
     sessionStorage.setItem(TASK_IN_PROGRESS_KEY, 'true');
     sessionStorage.setItem(LAB_ID_KEY, labId);
@@ -59,9 +63,10 @@ function submitTask() {
     stompClient.activate();
     stompClient.onConnect = (frame) => {
         console.log('Connected: ' + frame);
-        stompClient.subscribe('/user/queue/attempts', (response) => {
+        console.log(`subscribing to queue: /user/queue/attempts/${repoName}`);
+        stompClient.subscribe(`/user/queue/attempts/${repoName}`, (response) => {
             const buildResult = JSON.parse(response.body);
-            console.log(buildResult);
+            console.log("Received task results: ", buildResult);
 
             if (buildResult.status === 'error') {
                 alert(buildResult.message);
@@ -132,7 +137,6 @@ function disconnect() {
 function buildAndTestRepository() {
     if (stompClient.connected) {
         const labId = parseInt($(`#${SUBMIT_TASK_BUTTON_ID}`).data("lab-id"));
-        console.log(labId);
         stompClient.publish({
             destination: "/app/submitTask",
             body: JSON.stringify({ 'labId': labId })
@@ -145,7 +149,7 @@ function buildAndTestRepository() {
 function generateRepository() {
     if (stompClient.connected) {
         const labId = parseInt($(`#${START_TASK_BUTTON_ID}`).data("not-started-lab-id"));
-        console.log(labId);
+        // console.log(labId);
         stompClient.publish({
             destination: "/app/generateRepository",
             body: JSON.stringify({ 'labId': labId })
@@ -182,11 +186,12 @@ function buildRepositoryCard(githubUrl) {
     return cardDiv;
 }
 
-function createSubmitTaskButton(labId) {
+function createSubmitTaskButton(labId, githubUrl) {
     const button = document.createElement('button');
     button.id = SUBMIT_TASK_BUTTON_ID;
     button.className = 'btn btn-dark btn-block';
     button.dataset.labId = labId;
+    button.dataset.repoName = extractRepoName(githubUrl);
 
     const icon = document.createElement('i');
     icon.className = 'fab fa-github mr-1';
@@ -319,7 +324,7 @@ function addRepositoryCard(githubUrl, labId) {
     $("#repositoryCard").append(buildRepositoryCard(githubUrl));
     $(`#${START_TASK_BUTTON_ID}`).hide();
 
-    const { button, div } = createSubmitTaskButton(labId);
+    const { button, div } = createSubmitTaskButton(labId, githubUrl);
     $("#submitTaskDiv").append(div);
     $(button).click(() => submitTask());
 }
@@ -330,3 +335,21 @@ $(function () {
     $(`#${START_TASK_BUTTON_ID}`).click(() => startTask());
     $("#disconnect").click(() => disconnect());
 });
+
+
+// REPOSITORY NAME EXTRACTOR UTILS
+function extractRepoName(url) {
+    url = removeTrailingSlash(url);
+    url = removeGitFromEnd(url);
+    const parts = url.split('/');
+    console.log(`Extracted repo name: ${parts[parts.length - 1]}`);
+    return parts[parts.length - 1];
+}
+
+function removeTrailingSlash(url) {
+    return url.endsWith('/') ? url.slice(0, -1) : url;
+}
+
+function removeGitFromEnd(url) {
+    return url.endsWith('.git') ? url.slice(0, -4) : url;
+}

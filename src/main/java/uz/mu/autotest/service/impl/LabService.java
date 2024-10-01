@@ -30,7 +30,6 @@ import java.util.stream.Collectors;
 public class LabService {
 
     private final LabRepository labRepository;
-    private final TeacherService teacherService;
     private final CourseService courseService;
     private final ConversionService conversionService;
     private final StudentTakenLabRepository studentTakenLabRepository;
@@ -55,7 +54,7 @@ public class LabService {
 
     public Optional<Lab> getById(Long labId) {
         Optional<Lab> labById = labRepository.findById(labId);
-        log.info("Retrieved lab with id {}", labId);
+        log.info("Retrieved lab with id {}: {}", labId, labById);
         return labById;
     }
 

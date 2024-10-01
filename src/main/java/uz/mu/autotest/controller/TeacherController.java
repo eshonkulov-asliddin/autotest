@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import uz.mu.autotest.dto.course.CourseDto;
+import uz.mu.autotest.dto.lab.StudentLabResult;
 import uz.mu.autotest.dto.group.GroupDto;
 import uz.mu.autotest.dto.group.GroupLabAssignmentRequest;
 import uz.mu.autotest.dto.lab.AddLabRequest;
@@ -23,20 +23,17 @@ import uz.mu.autotest.dto.lab.LabDto;
 import uz.mu.autotest.dto.teacher.AddTeacherRequest;
 import uz.mu.autotest.model.Course;
 import uz.mu.autotest.model.Group;
-import uz.mu.autotest.model.GroupLabAssignment;
-import uz.mu.autotest.model.Lab;
 import uz.mu.autotest.model.Teacher;
 import uz.mu.autotest.service.GroupLabAssignmentService;
 import uz.mu.autotest.service.impl.CourseService;
 import uz.mu.autotest.service.impl.GroupService;
 import uz.mu.autotest.service.impl.LabService;
+import uz.mu.autotest.service.impl.StudentLabResultsGenerator;
 import uz.mu.autotest.service.impl.TeacherService;
 
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import static uz.mu.autotest.controller.util.ApiConst.TEACHERS_PREFIX;
 import static uz.mu.autotest.controller.util.KeyNames.COURSES;
@@ -52,8 +49,8 @@ public class TeacherController {
 
     @Value("${app.teacher.dashboardHtmlPage}")
     private String dashboardHtmlPage;
-    @Value("${app.teacher.labManagementHtmlPage}")
-    private String labManagementHtmlPage;
+    @Value("${app.teacher.labStatistics}")
+    private String labStatistics;
     @Value("${app.admin.teachersHtmlPage}")
     private String teachersHtmlPage;
 
@@ -62,6 +59,7 @@ public class TeacherController {
     private final CourseService courseService;
     private final LabService labService;
     private final GroupLabAssignmentService groupLabAssignmentService;
+    private final StudentLabResultsGenerator studentLabResultsGenerator;
 
     @PreAuthorize("hasRole('TEACHER')")
     @GetMapping("/dashboard")
@@ -110,22 +108,19 @@ public class TeacherController {
     @PostMapping("/group-lab-assignment")
     public String createGroupLabAssignment(@RequestBody GroupLabAssignmentRequest request) {
         groupLabAssignmentService.createGroupLabAssignment(request);
-        return labManagementHtmlPage;
+        return labStatistics;
     }
 
     @PreAuthorize("hasRole('TEACHER')")
     @GetMapping("/courses/{courseId}/labs")
     public String getLabsByGroupId(@PathVariable("courseId") Long courseId,
                                    @RequestParam(value = "groupId") Long groupId,
-                                   Principal principal,
                                    Model model) {
-        Course course = courseService.getById(courseId);
         Group group = groupService.getGroupById(groupId);
         List<LabDto> labsAssignedToGroup = labService.getLabsByCourseIdAndGroupId(courseId, groupId);
-        model.addAttribute("labsAssignedToGroup", labsAssignedToGroup);
-        model.addAttribute("group", group);
-        model.addAttribute("course", course);
-        return labManagementHtmlPage;
+        List<StudentLabResult> studentLabResults = studentLabResultsGenerator.generateStudentsLabResults(group.getStudents(), labsAssignedToGroup, courseId);
+        model.addAttribute("studentLabResults", studentLabResults);
+        return labStatistics;
     }
 
     @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")

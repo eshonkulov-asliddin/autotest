@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import uz.mu.autotest.dto.attempt.AttemptDto;
-import uz.mu.autotest.dto.lab.LabDto;
 import uz.mu.autotest.dto.lab.LabStatistics;
 import uz.mu.autotest.exception.NotFoundException;
 import uz.mu.autotest.model.Lab;
@@ -25,8 +24,6 @@ import uz.mu.autotest.utils.GithubUrlParser;
 import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import static uz.mu.autotest.controller.util.ApiConst.LABS_ENDPOINT;
 
@@ -41,31 +38,14 @@ public class LabController {
     private final AttemptService attemptService;
     private final ReadmeService readmeService;
 
-    @PreAuthorize("hasRole('STUDENT') or hasAuthority('OAUTH2_USER')")
     @GetMapping("/courses/{courseId}")
     public String getLabsByCourseId(@PathVariable(name = "courseId") Long courseId, Principal principal, Model model) {
-        String username = principal.getName();
-        List<StudentTakenLab> studentTakenLabs = studentTakenLabService.getLabsByCourseIdAndUsername(courseId, username);
-        List<LabDto> labsByCourseId = labService.getLabsByCourseId(username, courseId);
-
-        log.info("userTakenLabs: {}", studentTakenLabs);
-
-        // Extract lab IDs from labs taken by users
-        Set<Long> takenLabIds = studentTakenLabs.stream()
-                .map(userTakenLab -> userTakenLab.getLab().getId())
-                .collect(Collectors.toSet());
-
-        // Filter out labs that are not taken by users
-        List<LabDto> remainingLabs = labsByCourseId.stream()
-                .filter(lab -> !takenLabIds.contains(lab.id()))
-                .toList();
-
-        log.info("notStartedLabs: {}", remainingLabs);
-
-        model.addAttribute("labs", remainingLabs);
-        model.addAttribute("takenLabs", studentTakenLabs);
+        String login = principal.getName();
+        List<Object> allLabs = labService.getLabsForStudentASC(login, courseId);
+        model.addAttribute("sortedLabs", allLabs);
         return "labs.html";
     }
+
 
     @PreAuthorize("hasRole('STUDENT') or hasAuthority('OAUTH2_USER')")
     @GetMapping("/{labId}/start")

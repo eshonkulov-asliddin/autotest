@@ -19,6 +19,8 @@ import uz.mu.autotest.repository.GroupRepository;
 import uz.mu.autotest.repository.LabRepository;
 import uz.mu.autotest.repository.StudentTakenLabRepository;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -35,14 +37,47 @@ public class LabService {
     private final StudentTakenLabRepository studentTakenLabRepository;
     private final GroupRepository groupRepository;
     private final StudentService studentService;
+    private final StudentTakenLabService studentTakenLabService;
 
-    public List<LabDto> getLabsByCourseId(String username, Long courseId) {
+    public List<LabDto> getLabsByLoginAndCourseId(String login, Long courseId) {
         // TODO think about verifyAccess(username, courseId);
         List<Lab> labsByCourseId = labRepository.findByCourseId(courseId);
         log.info("Retrieved labs for course id {}: {}", courseId, labsByCourseId);
         return labsByCourseId.stream()
                 .map(lab -> conversionService.convert(lab, LabDto.class))
                 .toList();
+    }
+
+    public List<Object> getLabsForStudentASC(String login, Long courseId) {
+        // all labs
+        List<LabDto> labsByCourseId = getLabsByLoginAndCourseId(login, courseId);
+
+        // student taken labs
+        List<StudentTakenLab> studentTakenLabs = studentTakenLabService.getLabsByCourseIdAndLogin(courseId, login);
+        Set<Long> takenLabIds = studentTakenLabs.stream()
+                .map(takenLab -> takenLab.getLab().getId())
+                .collect(Collectors.toSet());
+
+        List<LabDto> remainingLabs = labsByCourseId.stream()
+                .filter(lab -> !takenLabIds.contains(lab.id()))
+                .toList();
+
+        // Combine both lists into a common list of type Object (or a shared DTO type)
+        List<Object> allLabs = new ArrayList<>();
+        allLabs.addAll(studentTakenLabs);
+        allLabs.addAll(remainingLabs);
+
+        // Sort the combined list by ID
+        allLabs.sort(Comparator.comparing(lab -> {
+            if (lab instanceof LabDto) {
+                return ((LabDto) lab).id(); // LabDto has 'id()' method
+            } else if (lab instanceof StudentTakenLab) {
+                return ((StudentTakenLab) lab).getLab().getId(); // StudentTakenLab uses 'lab.getId()'
+            }
+            return Long.MAX_VALUE; // Optional: If needed to handle nulls or other cases
+        }));
+
+        return allLabs;
     }
 
     public List<LabDto> getLabsByCourseIdAndGroupId(Long courseId, Long groupId) {

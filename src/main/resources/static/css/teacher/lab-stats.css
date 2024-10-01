@@ -1,0 +1,47 @@
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    text-align: center;
+}
+
+.lab-status {
+    width: 100px;
+    text-align: center;
+}
+
+.status-red {
+    background-color: red;
+    color: white;
+}
+
+.status-yellow {
+    background-color: yellow;
+    color: black;
+}
+
+.status-green {
+    background-color: green;
+    color: white;
+}
+
+.container-fluid {
+    display: flex;
+    justify-content: center;
+}
+
+/* Make the first column (student names) sticky */
+th:first-child, td:first-child {
+    position: sticky;
+    left: 0;
+    background-color: #f8f9fa;
+    z-index: 1;
+}
+
+table th, table td {
+    vertical-align: middle;
+}
+
+/* Add a shadow to the fixed student column */
+td:first-child {
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}

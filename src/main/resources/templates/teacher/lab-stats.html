@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab Results</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link th:href="@{/css/teacher/lab-stats.css}" rel="stylesheet">
+
+</head>
+<body>
+
+<div class="container-fluid p-5">
+    <div class="table-wrapper">
+        <h4 class="mb-4">Lab Results</h4>
+
+        <!-- Check if there are no studentLabResults -->
+        <div th:if="${#lists.isEmpty(studentLabResults)}" class="alert alert-warning">
+            No lab results available.
+        </div>
+
+        <!-- Only show table if studentLabResults are present -->
+        <table th:if="${!#lists.isEmpty(studentLabResults)}" class="table table-bordered">
+            <thead>
+            <tr>
+                <th>Student</th>
+                <!-- Dynamically generate lab columns based on the first student's labs -->
+                <th th:each="lab : ${studentLabResults[0].labs}" th:text="${lab.name}"></th>
+            </tr>
+            </thead>
+            <tbody>
+            <!-- Loop over each studentLabResult object -->
+            <tr th:each="studentLabResult : ${studentLabResults}">
+                <!-- Display student username -->
+                <td th:text="${studentLabResult.username}"></td>
+
+                <!-- Loop over labs for the current student -->
+                <td th:each="lab : ${studentLabResult.labs}"
+                    th:classappend="${lab.status.name() == 'COMPLETED'} ? 'status-green' :
+                                        (${lab.status.name() == 'STARTED'} ? 'status-yellow' : 'status-red')"
+                    th:text="${lab.status}">
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Bootstrap JS and dependencies -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
